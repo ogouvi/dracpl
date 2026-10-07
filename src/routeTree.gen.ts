@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as SplatRouteImport } from './routes/$'
 import { Route as ArchivesRouteImport } from './routes/archives'
 import { Route as ArtsTraditionnelsRouteImport } from './routes/arts-traditionnels'
 import { Route as ConfidentialiteRouteImport } from './routes/confidentialite'
@@ -43,6 +44,11 @@ import { Route as VideosSlugRouteImport } from './routes/videos.$slug'
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SplatRoute = SplatRouteImport.update({
+  id: '/$',
+  path: '/$',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ArchivesRoute = ArchivesRouteImport.update({
@@ -193,6 +199,7 @@ const VideosSlugRoute = VideosSlugRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/$': typeof SplatRoute
   '/archives': typeof ArchivesRoute
   '/arts-traditionnels': typeof ArtsTraditionnelsRoute
   '/confidentialite': typeof ConfidentialiteRoute
@@ -225,6 +232,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/$': typeof SplatRoute
   '/archives': typeof ArchivesRoute
   '/arts-traditionnels': typeof ArtsTraditionnelsRoute
   '/confidentialite': typeof ConfidentialiteRoute
@@ -258,6 +266,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/$': typeof SplatRoute
   '/archives': typeof ArchivesRoute
   '/arts-traditionnels': typeof ArtsTraditionnelsRoute
   '/confidentialite': typeof ConfidentialiteRoute
@@ -292,6 +301,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/$'
     | '/archives'
     | '/arts-traditionnels'
     | '/confidentialite'
@@ -324,6 +334,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/$'
     | '/archives'
     | '/arts-traditionnels'
     | '/confidentialite'
@@ -356,6 +367,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/$'
     | '/archives'
     | '/arts-traditionnels'
     | '/confidentialite'
@@ -389,6 +401,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  SplatRoute: typeof SplatRoute
   ArchivesRoute: typeof ArchivesRoute
   ArtsTraditionnelsRoute: typeof ArtsTraditionnelsRoute
   ConfidentialiteRoute: typeof ConfidentialiteRoute
@@ -427,6 +440,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/$': {
+      id: '/$'
+      path: '/$'
+      fullPath: '/$'
+      preLoaderRoute: typeof SplatRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/archives': {
@@ -637,6 +657,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  SplatRoute: SplatRoute,
   ArchivesRoute: ArchivesRoute,
   ArtsTraditionnelsRoute: ArtsTraditionnelsRoute,
   ConfidentialiteRoute: ConfidentialiteRoute,
