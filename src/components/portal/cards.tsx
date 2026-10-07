@@ -1,0 +1,20 @@
+import { Link } from '@tanstack/react-router';
+import { ArrowRight, MapPin, Play, CalendarDays } from 'lucide-react';
+import { content, images, type ContentItem, type ContentKind } from '@/lib/portal/content';
+import { Button } from '@/components/ui/button';
+export function ItemLink({kind,item,children,className}:{kind:ContentKind;item:ContentItem;children:React.ReactNode;className?:string}) {
+ switch(kind) {
+ case 'actualites':return <Link to="/actualites/$slug" params={{slug:item.slug}} className={className}>{children}</Link>;
+ case 'annonces':return <Link to="/annonces/$slug" params={{slug:item.slug}} className={className}>{children}</Link>;
+ case 'agenda':return <Link to="/agenda/$slug" params={{slug:item.slug}} className={className}>{children}</Link>;
+ case 'projets':return <Link to="/projets/$slug" params={{slug:item.slug}} className={className}>{children}</Link>;
+ case 'galeries':return <Link to="/galeries/$slug" params={{slug:item.slug}} className={className}>{children}</Link>;
+ case 'videos':return <Link to="/videos/$slug" params={{slug:item.slug}} className={className}>{children}</Link>;
+ case 'artistes':return <Link to="/artistes/$slug" params={{slug:item.slug}} className={className}>{children}</Link>;
+ }
+}
+export function ContentCard({item,kind}:{item:ContentItem;kind:ContentKind}) { return <article className="content-card"><ItemLink kind={kind} item={item}><div className="card-image"><img src={item.image} alt={item.title} loading="lazy" width={1200} height={800}/>{kind==='agenda'&&<div className="date-block"><strong>{item.day}</strong><span>{item.month}</span></div>}{kind==='videos'&&<span className="media-play"><Play/></span>}</div></ItemLink><div className="card-body"><div className="meta"><span className="tag">{item.category}</span>{kind!=='agenda'&&<span>{item.duration||item.date}</span>}</div><h3><ItemLink kind={kind} item={item}>{item.title}</ItemLink></h3>{item.location&&<div className="meta"><MapPin size={13}/>{item.location}</div>}{item.status&&<div className="meta">{item.status}</div>}<p>{item.summary}</p><ItemLink kind={kind} item={item} className="section-link mt-3">{kind==='agenda'?'Voir le rendez-vous':kind==='projets'?'Découvrir le programme':kind==='galeries'?'Voir la galerie':kind==='videos'?'Voir le récit':'En savoir plus'}<ArrowRight size={14}/></ItemLink></div></article>; }
+export function AnnouncementCard({item}:{item:ContentItem}) { return <article className="announcement"><div className="meta"><span className="tag">{item.category}</span><span>{item.date}</span></div><h3><ItemLink kind="annonces" item={item}>{item.title}</ItemLink></h3><p>{item.summary}</p><ItemLink kind="annonces" item={item} className="section-link mt-auto">Consulter l’annonce<ArrowRight size={14}/></ItemLink></article>; }
+export function SectionHeading({eyebrow,title,path,label}:{eyebrow:string;title:string;path?:string;label?:string}) { return <div className="section-heading"><div><div className="eyebrow">{eyebrow}</div><h2>{title}</h2></div>{path&&<Link to={path} className="section-link">{label||'Tout découvrir'}<ArrowRight size={15}/></Link>}</div>; }
+export function HeritageCards() { return <div className="grid-3">{([['Arts traditionnels','/arts-traditionnels',images.dance],['Patrimoine culturel','/patrimoine-culturel',images.heritage],['Artistes et acteurs culturels','/artistes',images.artisan]] as const).map(([label,path,img])=><Link to={path} key={path} className="image-topic"><img src={img} alt={label} loading="lazy" width={1200} height={800}/><div className="topic-label"><h3>{label}</h3><ArrowRight size={21}/></div></Link>)}</div>; }
+export function PartnerGrid() { return <div className="partner-grid"><div className="partner-word">République<br/><span className="text-sm">togolaise</span></div><div className="partner-word">UNESCO</div><div className="partner-word">Collectivités<br/><span className="text-sm">des Plateaux</span></div><div className="partner-word">Acteurs<br/><span className="text-sm">culturels locaux</span></div></div>; }

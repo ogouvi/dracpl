@@ -8,3 +8,8 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+## Architecture
+- Keep TanStack Start routing and use lightweight semantic React markup with shared CSS; the runtime is fixed but the presentation should translate cleanly to Gutenberg.
+- Store demonstration editorial content in a browser-safe structured module and render it with shared archive and detail templates; this mirrors future WordPress content types and fields.
+- Keep contact submission client-side with an explicit unsent state until a delivery service is requested; never claim a message was delivered.
