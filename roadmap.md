@@ -1,5 +1,5 @@
 # Portal roadmap
-- [ ] Create the French design system and global header/footer.
-- [ ] Build the homepage and all requested interior pages.
-- [ ] Add search, filters, pagination, galleries, FAQ and contact form states.
-- [ ] Verify navigation, search and mobile presentation.
+- [x] Create the French design system and global header/footer.
+- [x] Build the homepage and all requested interior pages.
+- [x] Add search, filters, pagination, galleries, FAQ and contact form states.
+- [x] Verify navigation, search and mobile presentation.
