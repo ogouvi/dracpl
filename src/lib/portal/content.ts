@@ -45,7 +45,7 @@ export const content: Record<ContentKind,ContentItem[]> = {
  {slug:'expressions-notse',title:'Les expressions de Notsé',category:'Musique et danse',location:'Notsé',date:'2026',image:dance,summary:'Des pratiques vivantes au croisement de la musique et de la mémoire.',body:['Une fiche consacrée aux pratiques collectives. Les structures et artistes seront présentés après accord.']}
  ]
 };
-export const pageInfo: Record<string,{title:string;intro:string;eyebrow?:string}> = {
+export const pageInfo = {
  'la-direction':{title:'La Direction',intro:'Au service des arts, des cultures et de la transmission dans la région des Plateaux.'},
  missions:{title:'Missions et attributions',intro:'Accompagner la création, préserver le patrimoine et rendre la culture accessible à tous.'},
  organisation:{title:'Organisation et équipe',intro:'Une organisation au service des acteurs culturels et des habitants des Plateaux.'},
@@ -71,3 +71,28 @@ export const pageInfo: Record<string,{title:string;intro:string;eyebrow?:string}
 };
 export const nav = [ ['Accueil','/'],['La Direction','/la-direction'],['Actualités','/actualites'],['Annonces','/annonces'],['Agenda culturel','/agenda'],['Patrimoine et cultures','/patrimoine'],['Médiathèque','/mediatheque'],['Projets','/projets'],['Partenaires','/partenaires'],['Contact','/contact'] ] as const;
 export function metadata(title:string, description:string) { return {meta:[{title:`${title} — Arts & Cultures des Plateaux`},{name:'description',content:description},{property:'og:title',content:`${title} — Arts & Cultures des Plateaux`},{property:'og:description',content:description},{property:'og:type',content:'website'},{name:'twitter:card',content:'summary_large_image'}]}; }
+
+export const pagePaths = {
+ 'la-direction': '/la-direction',
+ 'missions': '/missions',
+ 'organisation': '/organisation',
+ 'actualites': '/actualites',
+ 'annonces': '/annonces',
+ 'agenda': '/agenda',
+ 'patrimoine': '/patrimoine',
+ 'arts-traditionnels': '/arts-traditionnels',
+ 'patrimoine-culturel': '/patrimoine-culturel',
+ 'artistes': '/artistes',
+ 'mediatheque': '/mediatheque',
+ 'galeries': '/galeries',
+ 'videos': '/videos',
+ 'projets': '/projets',
+ 'partenaires': '/partenaires',
+ 'contact': '/contact',
+ 'faq': '/faq',
+ 'recherche': '/recherche',
+ 'archives': '/archives',
+ 'mentions-legales': '/mentions-legales',
+ 'confidentialite': '/confidentialite',
+ 'plan-du-site': '/plan-du-site',
+} as const;
