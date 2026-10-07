@@ -10,33 +10,414 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ArchivesRouteImport } from './routes/archives'
+import { Route as ArtsTraditionnelsRouteImport } from './routes/arts-traditionnels'
+import { Route as ConfidentialiteRouteImport } from './routes/confidentialite'
+import { Route as ContactRouteImport } from './routes/contact'
+import { Route as FaqRouteImport } from './routes/faq'
+import { Route as LaDirectionRouteImport } from './routes/la-direction'
+import { Route as MediathequeRouteImport } from './routes/mediatheque'
+import { Route as MentionsLegalesRouteImport } from './routes/mentions-legales'
+import { Route as MissionsRouteImport } from './routes/missions'
+import { Route as OrganisationRouteImport } from './routes/organisation'
+import { Route as PartenairesRouteImport } from './routes/partenaires'
+import { Route as PatrimoineRouteImport } from './routes/patrimoine'
+import { Route as PatrimoineCulturelRouteImport } from './routes/patrimoine-culturel'
+import { Route as PlanDuSiteRouteImport } from './routes/plan-du-site'
+import { Route as RechercheRouteImport } from './routes/recherche'
+import { Route as ActualitesIndexRouteImport } from './routes/actualites.index'
+import { Route as ActualitesSlugRouteImport } from './routes/actualites.$slug'
+import { Route as AgendaIndexRouteImport } from './routes/agenda.index'
+import { Route as AgendaSlugRouteImport } from './routes/agenda.$slug'
+import { Route as AnnoncesIndexRouteImport } from './routes/annonces.index'
+import { Route as AnnoncesSlugRouteImport } from './routes/annonces.$slug'
+import { Route as ArtistesIndexRouteImport } from './routes/artistes.index'
+import { Route as ArtistesSlugRouteImport } from './routes/artistes.$slug'
+import { Route as GaleriesIndexRouteImport } from './routes/galeries.index'
+import { Route as GaleriesSlugRouteImport } from './routes/galeries.$slug'
+import { Route as ProjetsIndexRouteImport } from './routes/projets.index'
+import { Route as ProjetsSlugRouteImport } from './routes/projets.$slug'
+import { Route as VideosIndexRouteImport } from './routes/videos.index'
+import { Route as VideosSlugRouteImport } from './routes/videos.$slug'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ArchivesRoute = ArchivesRouteImport.update({
+  id: '/archives',
+  path: '/archives',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ArtsTraditionnelsRoute = ArtsTraditionnelsRouteImport.update({
+  id: '/arts-traditionnels',
+  path: '/arts-traditionnels',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConfidentialiteRoute = ConfidentialiteRouteImport.update({
+  id: '/confidentialite',
+  path: '/confidentialite',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContactRoute = ContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FaqRoute = FaqRouteImport.update({
+  id: '/faq',
+  path: '/faq',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LaDirectionRoute = LaDirectionRouteImport.update({
+  id: '/la-direction',
+  path: '/la-direction',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MediathequeRoute = MediathequeRouteImport.update({
+  id: '/mediatheque',
+  path: '/mediatheque',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MentionsLegalesRoute = MentionsLegalesRouteImport.update({
+  id: '/mentions-legales',
+  path: '/mentions-legales',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MissionsRoute = MissionsRouteImport.update({
+  id: '/missions',
+  path: '/missions',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OrganisationRoute = OrganisationRouteImport.update({
+  id: '/organisation',
+  path: '/organisation',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PartenairesRoute = PartenairesRouteImport.update({
+  id: '/partenaires',
+  path: '/partenaires',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PatrimoineRoute = PatrimoineRouteImport.update({
+  id: '/patrimoine',
+  path: '/patrimoine',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PatrimoineCulturelRoute = PatrimoineCulturelRouteImport.update({
+  id: '/patrimoine-culturel',
+  path: '/patrimoine-culturel',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PlanDuSiteRoute = PlanDuSiteRouteImport.update({
+  id: '/plan-du-site',
+  path: '/plan-du-site',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RechercheRoute = RechercheRouteImport.update({
+  id: '/recherche',
+  path: '/recherche',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ActualitesIndexRoute = ActualitesIndexRouteImport.update({
+  id: '/actualites/',
+  path: '/actualites/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ActualitesSlugRoute = ActualitesSlugRouteImport.update({
+  id: '/actualites/$slug',
+  path: '/actualites/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AgendaIndexRoute = AgendaIndexRouteImport.update({
+  id: '/agenda/',
+  path: '/agenda/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AgendaSlugRoute = AgendaSlugRouteImport.update({
+  id: '/agenda/$slug',
+  path: '/agenda/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AnnoncesIndexRoute = AnnoncesIndexRouteImport.update({
+  id: '/annonces/',
+  path: '/annonces/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AnnoncesSlugRoute = AnnoncesSlugRouteImport.update({
+  id: '/annonces/$slug',
+  path: '/annonces/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ArtistesIndexRoute = ArtistesIndexRouteImport.update({
+  id: '/artistes/',
+  path: '/artistes/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ArtistesSlugRoute = ArtistesSlugRouteImport.update({
+  id: '/artistes/$slug',
+  path: '/artistes/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GaleriesIndexRoute = GaleriesIndexRouteImport.update({
+  id: '/galeries/',
+  path: '/galeries/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GaleriesSlugRoute = GaleriesSlugRouteImport.update({
+  id: '/galeries/$slug',
+  path: '/galeries/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProjetsIndexRoute = ProjetsIndexRouteImport.update({
+  id: '/projets/',
+  path: '/projets/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProjetsSlugRoute = ProjetsSlugRouteImport.update({
+  id: '/projets/$slug',
+  path: '/projets/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VideosIndexRoute = VideosIndexRouteImport.update({
+  id: '/videos/',
+  path: '/videos/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VideosSlugRoute = VideosSlugRouteImport.update({
+  id: '/videos/$slug',
+  path: '/videos/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/archives': typeof ArchivesRoute
+  '/arts-traditionnels': typeof ArtsTraditionnelsRoute
+  '/confidentialite': typeof ConfidentialiteRoute
+  '/contact': typeof ContactRoute
+  '/faq': typeof FaqRoute
+  '/la-direction': typeof LaDirectionRoute
+  '/mediatheque': typeof MediathequeRoute
+  '/mentions-legales': typeof MentionsLegalesRoute
+  '/missions': typeof MissionsRoute
+  '/organisation': typeof OrganisationRoute
+  '/partenaires': typeof PartenairesRoute
+  '/patrimoine': typeof PatrimoineRoute
+  '/patrimoine-culturel': typeof PatrimoineCulturelRoute
+  '/plan-du-site': typeof PlanDuSiteRoute
+  '/recherche': typeof RechercheRoute
+  '/actualites/$slug': typeof ActualitesSlugRoute
+  '/agenda/$slug': typeof AgendaSlugRoute
+  '/annonces/$slug': typeof AnnoncesSlugRoute
+  '/artistes/$slug': typeof ArtistesSlugRoute
+  '/galeries/$slug': typeof GaleriesSlugRoute
+  '/projets/$slug': typeof ProjetsSlugRoute
+  '/videos/$slug': typeof VideosSlugRoute
+  '/actualites/': typeof ActualitesIndexRoute
+  '/agenda/': typeof AgendaIndexRoute
+  '/annonces/': typeof AnnoncesIndexRoute
+  '/artistes/': typeof ArtistesIndexRoute
+  '/galeries/': typeof GaleriesIndexRoute
+  '/projets/': typeof ProjetsIndexRoute
+  '/videos/': typeof VideosIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/archives': typeof ArchivesRoute
+  '/arts-traditionnels': typeof ArtsTraditionnelsRoute
+  '/confidentialite': typeof ConfidentialiteRoute
+  '/contact': typeof ContactRoute
+  '/faq': typeof FaqRoute
+  '/la-direction': typeof LaDirectionRoute
+  '/mediatheque': typeof MediathequeRoute
+  '/mentions-legales': typeof MentionsLegalesRoute
+  '/missions': typeof MissionsRoute
+  '/organisation': typeof OrganisationRoute
+  '/partenaires': typeof PartenairesRoute
+  '/patrimoine': typeof PatrimoineRoute
+  '/patrimoine-culturel': typeof PatrimoineCulturelRoute
+  '/plan-du-site': typeof PlanDuSiteRoute
+  '/recherche': typeof RechercheRoute
+  '/actualites/$slug': typeof ActualitesSlugRoute
+  '/agenda/$slug': typeof AgendaSlugRoute
+  '/annonces/$slug': typeof AnnoncesSlugRoute
+  '/artistes/$slug': typeof ArtistesSlugRoute
+  '/galeries/$slug': typeof GaleriesSlugRoute
+  '/projets/$slug': typeof ProjetsSlugRoute
+  '/videos/$slug': typeof VideosSlugRoute
+  '/actualites': typeof ActualitesIndexRoute
+  '/agenda': typeof AgendaIndexRoute
+  '/annonces': typeof AnnoncesIndexRoute
+  '/artistes': typeof ArtistesIndexRoute
+  '/galeries': typeof GaleriesIndexRoute
+  '/projets': typeof ProjetsIndexRoute
+  '/videos': typeof VideosIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/archives': typeof ArchivesRoute
+  '/arts-traditionnels': typeof ArtsTraditionnelsRoute
+  '/confidentialite': typeof ConfidentialiteRoute
+  '/contact': typeof ContactRoute
+  '/faq': typeof FaqRoute
+  '/la-direction': typeof LaDirectionRoute
+  '/mediatheque': typeof MediathequeRoute
+  '/mentions-legales': typeof MentionsLegalesRoute
+  '/missions': typeof MissionsRoute
+  '/organisation': typeof OrganisationRoute
+  '/partenaires': typeof PartenairesRoute
+  '/patrimoine': typeof PatrimoineRoute
+  '/patrimoine-culturel': typeof PatrimoineCulturelRoute
+  '/plan-du-site': typeof PlanDuSiteRoute
+  '/recherche': typeof RechercheRoute
+  '/actualites/$slug': typeof ActualitesSlugRoute
+  '/agenda/$slug': typeof AgendaSlugRoute
+  '/annonces/$slug': typeof AnnoncesSlugRoute
+  '/artistes/$slug': typeof ArtistesSlugRoute
+  '/galeries/$slug': typeof GaleriesSlugRoute
+  '/projets/$slug': typeof ProjetsSlugRoute
+  '/videos/$slug': typeof VideosSlugRoute
+  '/actualites/': typeof ActualitesIndexRoute
+  '/agenda/': typeof AgendaIndexRoute
+  '/annonces/': typeof AnnoncesIndexRoute
+  '/artistes/': typeof ArtistesIndexRoute
+  '/galeries/': typeof GaleriesIndexRoute
+  '/projets/': typeof ProjetsIndexRoute
+  '/videos/': typeof VideosIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/archives'
+    | '/arts-traditionnels'
+    | '/confidentialite'
+    | '/contact'
+    | '/faq'
+    | '/la-direction'
+    | '/mediatheque'
+    | '/mentions-legales'
+    | '/missions'
+    | '/organisation'
+    | '/partenaires'
+    | '/patrimoine'
+    | '/patrimoine-culturel'
+    | '/plan-du-site'
+    | '/recherche'
+    | '/actualites/$slug'
+    | '/agenda/$slug'
+    | '/annonces/$slug'
+    | '/artistes/$slug'
+    | '/galeries/$slug'
+    | '/projets/$slug'
+    | '/videos/$slug'
+    | '/actualites/'
+    | '/agenda/'
+    | '/annonces/'
+    | '/artistes/'
+    | '/galeries/'
+    | '/projets/'
+    | '/videos/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/archives'
+    | '/arts-traditionnels'
+    | '/confidentialite'
+    | '/contact'
+    | '/faq'
+    | '/la-direction'
+    | '/mediatheque'
+    | '/mentions-legales'
+    | '/missions'
+    | '/organisation'
+    | '/partenaires'
+    | '/patrimoine'
+    | '/patrimoine-culturel'
+    | '/plan-du-site'
+    | '/recherche'
+    | '/actualites/$slug'
+    | '/agenda/$slug'
+    | '/annonces/$slug'
+    | '/artistes/$slug'
+    | '/galeries/$slug'
+    | '/projets/$slug'
+    | '/videos/$slug'
+    | '/actualites'
+    | '/agenda'
+    | '/annonces'
+    | '/artistes'
+    | '/galeries'
+    | '/projets'
+    | '/videos'
+  id:
+    | '__root__'
+    | '/'
+    | '/archives'
+    | '/arts-traditionnels'
+    | '/confidentialite'
+    | '/contact'
+    | '/faq'
+    | '/la-direction'
+    | '/mediatheque'
+    | '/mentions-legales'
+    | '/missions'
+    | '/organisation'
+    | '/partenaires'
+    | '/patrimoine'
+    | '/patrimoine-culturel'
+    | '/plan-du-site'
+    | '/recherche'
+    | '/actualites/$slug'
+    | '/agenda/$slug'
+    | '/annonces/$slug'
+    | '/artistes/$slug'
+    | '/galeries/$slug'
+    | '/projets/$slug'
+    | '/videos/$slug'
+    | '/actualites/'
+    | '/agenda/'
+    | '/annonces/'
+    | '/artistes/'
+    | '/galeries/'
+    | '/projets/'
+    | '/videos/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ArchivesRoute: typeof ArchivesRoute
+  ArtsTraditionnelsRoute: typeof ArtsTraditionnelsRoute
+  ConfidentialiteRoute: typeof ConfidentialiteRoute
+  ContactRoute: typeof ContactRoute
+  FaqRoute: typeof FaqRoute
+  LaDirectionRoute: typeof LaDirectionRoute
+  MediathequeRoute: typeof MediathequeRoute
+  MentionsLegalesRoute: typeof MentionsLegalesRoute
+  MissionsRoute: typeof MissionsRoute
+  OrganisationRoute: typeof OrganisationRoute
+  PartenairesRoute: typeof PartenairesRoute
+  PatrimoineRoute: typeof PatrimoineRoute
+  PatrimoineCulturelRoute: typeof PatrimoineCulturelRoute
+  PlanDuSiteRoute: typeof PlanDuSiteRoute
+  RechercheRoute: typeof RechercheRoute
+  ActualitesSlugRoute: typeof ActualitesSlugRoute
+  AgendaSlugRoute: typeof AgendaSlugRoute
+  AnnoncesSlugRoute: typeof AnnoncesSlugRoute
+  ArtistesSlugRoute: typeof ArtistesSlugRoute
+  GaleriesSlugRoute: typeof GaleriesSlugRoute
+  ProjetsSlugRoute: typeof ProjetsSlugRoute
+  VideosSlugRoute: typeof VideosSlugRoute
+  ActualitesIndexRoute: typeof ActualitesIndexRoute
+  AgendaIndexRoute: typeof AgendaIndexRoute
+  AnnoncesIndexRoute: typeof AnnoncesIndexRoute
+  ArtistesIndexRoute: typeof ArtistesIndexRoute
+  GaleriesIndexRoute: typeof GaleriesIndexRoute
+  ProjetsIndexRoute: typeof ProjetsIndexRoute
+  VideosIndexRoute: typeof VideosIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +429,243 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/archives': {
+      id: '/archives'
+      path: '/archives'
+      fullPath: '/archives'
+      preLoaderRoute: typeof ArchivesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/arts-traditionnels': {
+      id: '/arts-traditionnels'
+      path: '/arts-traditionnels'
+      fullPath: '/arts-traditionnels'
+      preLoaderRoute: typeof ArtsTraditionnelsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/confidentialite': {
+      id: '/confidentialite'
+      path: '/confidentialite'
+      fullPath: '/confidentialite'
+      preLoaderRoute: typeof ConfidentialiteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contact': {
+      id: '/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/faq': {
+      id: '/faq'
+      path: '/faq'
+      fullPath: '/faq'
+      preLoaderRoute: typeof FaqRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/la-direction': {
+      id: '/la-direction'
+      path: '/la-direction'
+      fullPath: '/la-direction'
+      preLoaderRoute: typeof LaDirectionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mediatheque': {
+      id: '/mediatheque'
+      path: '/mediatheque'
+      fullPath: '/mediatheque'
+      preLoaderRoute: typeof MediathequeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mentions-legales': {
+      id: '/mentions-legales'
+      path: '/mentions-legales'
+      fullPath: '/mentions-legales'
+      preLoaderRoute: typeof MentionsLegalesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/missions': {
+      id: '/missions'
+      path: '/missions'
+      fullPath: '/missions'
+      preLoaderRoute: typeof MissionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/organisation': {
+      id: '/organisation'
+      path: '/organisation'
+      fullPath: '/organisation'
+      preLoaderRoute: typeof OrganisationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/partenaires': {
+      id: '/partenaires'
+      path: '/partenaires'
+      fullPath: '/partenaires'
+      preLoaderRoute: typeof PartenairesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/patrimoine': {
+      id: '/patrimoine'
+      path: '/patrimoine'
+      fullPath: '/patrimoine'
+      preLoaderRoute: typeof PatrimoineRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/patrimoine-culturel': {
+      id: '/patrimoine-culturel'
+      path: '/patrimoine-culturel'
+      fullPath: '/patrimoine-culturel'
+      preLoaderRoute: typeof PatrimoineCulturelRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/plan-du-site': {
+      id: '/plan-du-site'
+      path: '/plan-du-site'
+      fullPath: '/plan-du-site'
+      preLoaderRoute: typeof PlanDuSiteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/recherche': {
+      id: '/recherche'
+      path: '/recherche'
+      fullPath: '/recherche'
+      preLoaderRoute: typeof RechercheRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/actualites/': {
+      id: '/actualites/'
+      path: '/actualites'
+      fullPath: '/actualites/'
+      preLoaderRoute: typeof ActualitesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/actualites/$slug': {
+      id: '/actualites/$slug'
+      path: '/actualites/$slug'
+      fullPath: '/actualites/$slug'
+      preLoaderRoute: typeof ActualitesSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/agenda/': {
+      id: '/agenda/'
+      path: '/agenda'
+      fullPath: '/agenda/'
+      preLoaderRoute: typeof AgendaIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/agenda/$slug': {
+      id: '/agenda/$slug'
+      path: '/agenda/$slug'
+      fullPath: '/agenda/$slug'
+      preLoaderRoute: typeof AgendaSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/annonces/': {
+      id: '/annonces/'
+      path: '/annonces'
+      fullPath: '/annonces/'
+      preLoaderRoute: typeof AnnoncesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/annonces/$slug': {
+      id: '/annonces/$slug'
+      path: '/annonces/$slug'
+      fullPath: '/annonces/$slug'
+      preLoaderRoute: typeof AnnoncesSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/artistes/': {
+      id: '/artistes/'
+      path: '/artistes'
+      fullPath: '/artistes/'
+      preLoaderRoute: typeof ArtistesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/artistes/$slug': {
+      id: '/artistes/$slug'
+      path: '/artistes/$slug'
+      fullPath: '/artistes/$slug'
+      preLoaderRoute: typeof ArtistesSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/galeries/': {
+      id: '/galeries/'
+      path: '/galeries'
+      fullPath: '/galeries/'
+      preLoaderRoute: typeof GaleriesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/galeries/$slug': {
+      id: '/galeries/$slug'
+      path: '/galeries/$slug'
+      fullPath: '/galeries/$slug'
+      preLoaderRoute: typeof GaleriesSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/projets/': {
+      id: '/projets/'
+      path: '/projets'
+      fullPath: '/projets/'
+      preLoaderRoute: typeof ProjetsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/projets/$slug': {
+      id: '/projets/$slug'
+      path: '/projets/$slug'
+      fullPath: '/projets/$slug'
+      preLoaderRoute: typeof ProjetsSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/videos/': {
+      id: '/videos/'
+      path: '/videos'
+      fullPath: '/videos/'
+      preLoaderRoute: typeof VideosIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/videos/$slug': {
+      id: '/videos/$slug'
+      path: '/videos/$slug'
+      fullPath: '/videos/$slug'
+      preLoaderRoute: typeof VideosSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ArchivesRoute: ArchivesRoute,
+  ArtsTraditionnelsRoute: ArtsTraditionnelsRoute,
+  ConfidentialiteRoute: ConfidentialiteRoute,
+  ContactRoute: ContactRoute,
+  FaqRoute: FaqRoute,
+  LaDirectionRoute: LaDirectionRoute,
+  MediathequeRoute: MediathequeRoute,
+  MentionsLegalesRoute: MentionsLegalesRoute,
+  MissionsRoute: MissionsRoute,
+  OrganisationRoute: OrganisationRoute,
+  PartenairesRoute: PartenairesRoute,
+  PatrimoineRoute: PatrimoineRoute,
+  PatrimoineCulturelRoute: PatrimoineCulturelRoute,
+  PlanDuSiteRoute: PlanDuSiteRoute,
+  RechercheRoute: RechercheRoute,
+  ActualitesSlugRoute: ActualitesSlugRoute,
+  AgendaSlugRoute: AgendaSlugRoute,
+  AnnoncesSlugRoute: AnnoncesSlugRoute,
+  ArtistesSlugRoute: ArtistesSlugRoute,
+  GaleriesSlugRoute: GaleriesSlugRoute,
+  ProjetsSlugRoute: ProjetsSlugRoute,
+  VideosSlugRoute: VideosSlugRoute,
+  ActualitesIndexRoute: ActualitesIndexRoute,
+  AgendaIndexRoute: AgendaIndexRoute,
+  AnnoncesIndexRoute: AnnoncesIndexRoute,
+  ArtistesIndexRoute: ArtistesIndexRoute,
+  GaleriesIndexRoute: GaleriesIndexRoute,
+  ProjetsIndexRoute: ProjetsIndexRoute,
+  VideosIndexRoute: VideosIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
