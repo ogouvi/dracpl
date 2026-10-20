@@ -82,19 +82,19 @@ export function mapWpPost(post: WpPost, kind: ContentKind, fallbackImage: string
   const item: ContentItem = {
     slug: post.slug,
     title: toText(post.title?.rendered ?? '') || 'Sans titre',
-    category: decode(String(acf.categorie ?? category?.name ?? '')) || 'Plateaux',
+    category: decode(String(acf['categorie'] ?? category?.name ?? '')) || 'Plateaux',
     date: formatFrenchDate(post.date),
     summary: toText(post.excerpt?.rendered ?? '').replace(/\s*\[…\]\s*$/, ''),
     image: media?.source_url || fallbackImage,
     body: toParagraphs(post.content?.rendered ?? ''),
   };
   if (kind === 'agenda') {
-    const town = decode(String(acf.ville ?? ''));
-    const time = decode(String(acf.horaire ?? ''));
+    const town = decode(String(acf['ville'] ?? ''));
+    const time = decode(String(acf['horaire'] ?? ''));
     if (town) item.location = town;
     if (time) item.time = time;
     if (iso) {
-      item.day = iso[3];
+      item.day = iso[3] ?? '';
       item.month = MONTHS_SHORT[Number(iso[2]) - 1] ?? '';
     }
   }
@@ -124,7 +124,10 @@ async function loadFromWordPress(base: string, kind: ContentKind): Promise<Conte
   if (!categoryId) return null;
   const posts = await fetchJson(`${base}/wp-json/wp/v2/posts?categories=${categoryId}&per_page=24&_embed=1&orderby=date&order=desc`);
   if (!Array.isArray(posts)) return null;
-  return posts.map((post, index) => mapWpPost(post as WpPost, kind, FALLBACK_IMAGES[index % FALLBACK_IMAGES.length]));
+  return posts.map((post, index) => {
+    const fallback = FALLBACK_IMAGES[index % FALLBACK_IMAGES.length] ?? images.dance;
+    return mapWpPost(post as WpPost, kind, fallback);
+  });
 }
 
 export const getPortalItems = createServerFn({ method: 'GET' })
@@ -137,7 +140,7 @@ export const getPortalItems = createServerFn({ method: 'GET' })
     const kind = data.kind;
     const entry = cache.get(kind);
     if (entry && Date.now() - entry.at < entry.ttl) return entry.result;
-    const base = (process.env.WORDPRESS_URL || '').replace(/\/+$/, '');
+    const base = (process.env['WORDPRESS_URL'] || '').replace(/\/+$/, '');
     let result: PortalResult;
     if (!base) {
       result = resolveResult(kind, null);
