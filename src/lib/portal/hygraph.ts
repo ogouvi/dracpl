@@ -1,9 +1,9 @@
 // Reads news and events from a Hygraph content workspace through its public content API.
 // Nothing here is needed until the HYGRAPH_ENDPOINT setting is filled in.
 
-import { content, images, type ContentItem, type ContentKind } from './content';
+import { type ContentItem, type ContentKind } from './content';
 import { decode, formatFrenchDate, frenchDateParts, toParagraphs, toText } from './text';
-import { FALLBACK_IMAGES, REQUEST_TIMEOUT, fallbackImage } from './wordpress';
+import { REQUEST_TIMEOUT, fallbackImage } from './wordpress';
 
 const NEWS_MODELS = ['actualites', 'news'];
 const EVENT_MODELS = ['evenements', 'events'];
@@ -147,5 +147,3 @@ export async function loadFromHygraph(endpoint: string, kind: ContentKind): Prom
   }
 }
 
-export const HYGRAPH_FALLBACK_IMAGES = FALLBACK_IMAGES;
-export const HYGRAPH_DEFAULT_IMAGE = images.dance;
