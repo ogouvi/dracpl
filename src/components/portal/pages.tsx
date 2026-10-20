@@ -4,7 +4,7 @@ import { Search, ArrowRight, ArrowLeft, MapPin, CalendarDays, Clock, Download, S
 import { Button } from '@/components/ui/button';
 import { content, images, pageInfo, pagePaths, type ContentKind, type ContentItem } from '@/lib/portal/content';
 import { PageBanner, ContactBand } from './chrome';
-import type { ContentSource } from '@/lib/portal/wordpress';
+import type { ContentSource } from '@/lib/portal/source';
 import { ContentCard, AnnouncementCard, HeritageCards, PartnerGrid, SectionHeading, ItemLink } from './cards';
 const kinds=Object.keys(content) as ContentKind[];
 const searchable=kinds.flatMap(kind=>content[kind].map(item=>({item,kind})));

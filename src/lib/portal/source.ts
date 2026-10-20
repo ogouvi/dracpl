@@ -1,18 +1,14 @@
 // Chooses where the portal's news and events come from:
 // a Hygraph workspace if one is configured, otherwise a WordPress site, otherwise the demonstration content.
-// The demonstration content is always labelled as such, never presented as published editorial content.
+// Demonstration content is always labelled as such and never presented as published editorial content.
 
 import { createServerFn } from '@tanstack/react-start';
-import { content, type ContentKind } from './content';
+import { content, type ContentItem, type ContentKind } from './content';
 import { loadFromHygraph } from './hygraph';
 import { CATEGORY_SLUG, loadFromWordPress } from './wordpress';
 
 export type ContentSource = 'wordpress' | 'hygraph' | 'demo';
-export type PortalResult = { items: ReturnType<typeof demoItems>; source: ContentSource };
-
-function demoItems(kind: ContentKind) {
-  return content[kind];
-}
+export type PortalResult = { items: ContentItem[]; source: ContentSource };
 
 const OK_TTL = 60_000;
 const EMPTY_TTL = 300_000;
@@ -24,16 +20,9 @@ export function resetPortalCache(): void {
   cache.clear();
 }
 
-export function resolveResult(kind: ContentKind, items: PortalResult['items'] | null): PortalResult {
-  return items && items.length ? { items, source: sourceOf(items) } : { items: content[kind], source: 'demo' };
+export function resolveResult(kind: ContentKind, items: ContentItem[] | null, source: ContentSource = 'demo'): PortalResult {
+  return items && items.length ? { items, source } : { items: content[kind], source: 'demo' };
 }
-
-// resolveResult only receives the winning source's items, so the source is passed along separately.
-function sourceOf(_items: PortalResult['items']): ContentSource {
-  return pendingSource;
-}
-
-let pendingSource: ContentSource = 'demo';
 
 export async function resolvePortalItems(kind: ContentKind, env: Record<string, string | undefined> = process.env): Promise<PortalResult> {
   const entry = cache.get(kind);
@@ -46,11 +35,8 @@ export async function resolvePortalItems(kind: ContentKind, env: Record<string, 
   if (hygraphEndpoint) {
     try {
       const items = await loadFromHygraph(hygraphEndpoint, kind);
-      if (items && items.length) {
-        result = { items, source: 'hygraph' };
-      } else {
-        console.warn(`Hygraph n’a rien fourni pour « ${kind} » : repli sur le contenu de démonstration.`);
-      }
+      if (items && items.length) result = { items, source: 'hygraph' };
+      else console.warn(`Hygraph n’a rien fourni pour « ${kind} » : repli sur le contenu de démonstration.`);
     } catch (error) {
       console.warn(`Hygraph indisponible pour « ${kind} » : ${error instanceof Error ? error.message : String(error)}`);
     }
@@ -59,11 +45,8 @@ export async function resolvePortalItems(kind: ContentKind, env: Record<string, 
   if (result.source === 'demo' && wordpressBase) {
     try {
       const items = await loadFromWordPress(wordpressBase, kind);
-      if (items && items.length) {
-        result = { items, source: 'wordpress' };
-      } else {
-        console.warn(`WordPress n’a rien fourni pour « ${kind} » : repli sur le contenu de démonstration.`);
-      }
+      if (items && items.length) result = { items, source: 'wordpress' };
+      else console.warn(`WordPress n’a rien fourni pour « ${kind} » : repli sur le contenu de démonstration.`);
     } catch (error) {
       console.warn(`WordPress indisponible pour « ${kind} » : ${error instanceof Error ? error.message : String(error)}`);
     }
