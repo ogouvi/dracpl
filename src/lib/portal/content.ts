@@ -2,7 +2,11 @@ import dance from '@/assets/cultural-dance.jpg';
 import heritage from '@/assets/heritage.jpg';
 import artisan from '@/assets/artisan.jpg';
 import exhibition from '@/assets/exhibition.jpg';
-export const images = { dance, heritage, artisan, exhibition };
+import education from '@/assets/education.jpg';
+import percussions from '@/assets/percussions.jpg';
+import paysages from '@/assets/paysages.jpg';
+import memoire from '@/assets/memoire.jpg';
+export const images = { dance, heritage, artisan, exhibition, education, percussions, paysages, memoire };
 export type ContentKind = 'actualites' | 'annonces' | 'agenda' | 'projets' | 'galeries' | 'videos' | 'artistes';
 export type ContentItem = { slug:string; title:string; category:string; date:string; summary:string; image:string; location?:string; day?:string; month?:string; time?:string; status?:string; duration?:string; body:string[] };
 export const content: Record<ContentKind,ContentItem[]> = {
