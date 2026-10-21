@@ -70,7 +70,7 @@ export const pageInfo = {
  'plan-du-site':{title:'Plan du site',intro:'Toutes les rubriques du portail culturel des Plateaux.'},
 };
 export const nav = [ ['Accueil','/'],['La Direction','/la-direction'],['Actualités','/actualites'],['Annonces','/annonces'],['Agenda culturel','/agenda'],['Patrimoine et cultures','/patrimoine'],['Médiathèque','/mediatheque'],['Projets','/projets'],['Partenaires','/partenaires'],['Contact','/contact'] ] as const;
-export function metadata(title:string, description:string) { return {meta:[{title:`${title} — Arts & Cultures des Plateaux`},{name:'description',content:description},{property:'og:title',content:`${title} — Arts & Cultures des Plateaux`},{property:'og:description',content:description},{property:'og:type',content:'website'},{name:'twitter:card',content:'summary_large_image'}]}; }
+export function metadata(title:string, description:string, image?:string) { return {meta:[{title:`${title} — Arts & Cultures des Plateaux`},{name:'description',content:description},{property:'og:title',content:`${title} — Arts & Cultures des Plateaux`},{property:'og:description',content:description},{property:'og:type',content:'website'},{name:'twitter:card',content:'summary_large_image'},...(image?.startsWith('https://')?[{property:'og:image',content:image},{name:'twitter:image',content:image}]:[])]}; }
 
 export const pagePaths = {
  'la-direction': '/la-direction',
