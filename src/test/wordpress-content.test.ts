@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 
 import { content } from "@/lib/portal/content";
-import { formatFrenchDate, mapWpPost, resolveResult, toParagraphs, type WpPost } from "@/lib/portal/wordpress";
+import { mapWpPost, type WpPost } from "@/lib/portal/wordpress";
+import { formatFrenchDate, toParagraphs } from "@/lib/portal/text";
+import { resolveResult } from "@/lib/portal/source";
 
 const eventPost: WpPost = {
   slug: "rythmes-de-kpalime",
@@ -51,7 +53,7 @@ describe("WordPress editorial content", () => {
     expect(result.source).toBe("demo");
     expect(result.items).toBe(content.agenda);
     expect(resolveResult("actualites", []).source).toBe("demo");
-    expect(resolveResult("actualites", [mapWpPost(eventPost, "actualites", "x")]).source).toBe("wordpress");
+    expect(resolveResult("actualites", [mapWpPost(eventPost, "actualites", "x")], "wordpress").source).toBe("wordpress");
   });
 
   it("turns WordPress article markup into plain paragraphs", () => {

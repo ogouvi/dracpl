@@ -14,7 +14,7 @@ const OK_TTL = 60_000;
 const EMPTY_TTL = 300_000;
 
 type CacheEntry = { at: number; ttl: number; result: PortalResult };
-const cache = new Map<ContentKind, CacheEntry>();
+const cache = new Map<string, CacheEntry>();
 
 export function resetPortalCache(): void {
   cache.clear();
@@ -24,8 +24,9 @@ export function resolveResult(kind: ContentKind, items: ContentItem[] | null, so
   return items && items.length ? { items, source } : { items: content[kind], source: 'demo' };
 }
 
-export async function resolvePortalItems(kind: ContentKind, env: Record<string, string | undefined> = process.env): Promise<PortalResult> {
-  const entry = cache.get(kind);
+export async function resolvePortalItems(kind: ContentKind, env: Record<string, string | undefined>): Promise<PortalResult> {
+  const key = JSON.stringify([kind, env['HYGRAPH_ENDPOINT'], env['WORDPRESS_URL'], env['HYGRAPH_NEWS_MODEL'], env['HYGRAPH_EVENT_MODEL']]);
+  const entry = cache.get(key);
   if (entry && Date.now() - entry.at < entry.ttl) return entry.result;
 
   const hygraphEndpoint = (env['HYGRAPH_ENDPOINT'] || '').trim();
@@ -34,7 +35,7 @@ export async function resolvePortalItems(kind: ContentKind, env: Record<string, 
 
   if (hygraphEndpoint) {
     try {
-      const items = await loadFromHygraph(hygraphEndpoint, kind);
+      const items = await loadFromHygraph(hygraphEndpoint, kind, env[kind === 'actualites' ? 'HYGRAPH_NEWS_MODEL' : 'HYGRAPH_EVENT_MODEL']);
       if (items && items.length) result = { items, source: 'hygraph' };
       else console.warn(`Hygraph n’a rien fourni pour « ${kind} » : repli sur le contenu de démonstration.`);
     } catch (error) {
@@ -52,7 +53,7 @@ export async function resolvePortalItems(kind: ContentKind, env: Record<string, 
     }
   }
 
-  cache.set(kind, { at: Date.now(), ttl: result.source === 'demo' ? EMPTY_TTL : OK_TTL, result });
+  cache.set(key, { at: Date.now(), ttl: result.source === 'demo' ? EMPTY_TTL : OK_TTL, result });
   return result;
 }
 
@@ -62,4 +63,9 @@ export const getPortalItems = createServerFn({ method: 'GET' })
     if (typeof kind !== 'string' || !(kind in CATEGORY_SLUG)) throw new Error('Rubrique non connectée à une source de contenu.');
     return { kind: kind as ContentKind };
   })
-  .handler(async ({ data }) => resolvePortalItems(data.kind));
+  .handler(async ({ data }) => resolvePortalItems(data.kind, {
+    HYGRAPH_ENDPOINT: process.env['HYGRAPH_ENDPOINT'],
+    HYGRAPH_NEWS_MODEL: process.env['HYGRAPH_NEWS_MODEL'],
+    HYGRAPH_EVENT_MODEL: process.env['HYGRAPH_EVENT_MODEL'],
+    WORDPRESS_URL: process.env['WORDPRESS_URL'],
+  }));
