@@ -10,7 +10,9 @@ const EVENT_MODELS = ['evenements', 'events'];
 
 const MINIMAL_FIELDS = 'slug title publishedAt';
 const CORE_FIELDS = 'slug title summary body { html } cover { url } date publishedAt';
+const CORE_GALLERY_FIELDS = `${CORE_FIELDS} gallery { url }`;
 const EVENT_FIELDS = `${CORE_FIELDS} categorie ville lieu horaire`;
+const EVENT_GALLERY_FIELDS = `${EVENT_FIELDS} gallery { url }`;
 
 type HygraphRecord = {
   slug?: string | null;
@@ -20,6 +22,7 @@ type HygraphRecord = {
   date?: string | null;
   publishedAt?: string | null;
   cover?: { url?: string | null; alternativeText?: string | null } | null;
+  gallery?: Array<{ url?: string | null } | null> | null;
   categorie?: string | null;
   category?: string | null;
   ville?: string | null;
