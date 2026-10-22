@@ -5,14 +5,23 @@ import { type ContentItem, type ContentKind } from './content';
 import { decode, formatFrenchDate, frenchDateParts, toParagraphs, toText } from './text';
 import { REQUEST_TIMEOUT, fallbackImage } from './wordpress';
 
-const NEWS_MODELS = ['actualites', 'news'];
-const EVENT_MODELS = ['evenements', 'events'];
+const MODELS: Partial<Record<ContentKind, string[]>> = {
+  actualites: ['actualites', 'news'],
+  agenda: ['evenements', 'events'],
+  annonces: ['annonces', 'announcements'],
+  galeries: ['galeries', 'galleries'],
+  videos: ['videos'],
+};
 
 const MINIMAL_FIELDS = 'slug title publishedAt';
 const CORE_FIELDS = 'slug title summary body { html } cover { url } date publishedAt';
 const CORE_GALLERY_FIELDS = `${CORE_FIELDS} gallery { url }`;
 const EVENT_FIELDS = `${CORE_FIELDS} categorie ville lieu horaire`;
 const EVENT_GALLERY_FIELDS = `${EVENT_FIELDS} gallery { url }`;
+const ANNOUNCEMENT_FIELDS = `${CORE_FIELDS} statut`;
+const ANNOUNCEMENT_GALLERY_FIELDS = `${CORE_GALLERY_FIELDS} statut`;
+const VIDEO_FIELDS = `${CORE_FIELDS} duree`;
+const VIDEO_GALLERY_FIELDS = `${CORE_GALLERY_FIELDS} duree`;
 
 type HygraphRecord = {
   slug?: string | null;
@@ -31,6 +40,10 @@ type HygraphRecord = {
   venue?: string | null;
   horaire?: string | null;
   time?: string | null;
+  statut?: string | null;
+  status?: string | null;
+  duree?: string | null;
+  duration?: string | null;
   sys?: { publishedAt?: string | null } | null;
 };
 
@@ -43,7 +56,7 @@ export function resetHygraphModels(): void {
 
 function modelsFor(kind: ContentKind, configured = ''): string[] {
   const configuredName = configured.trim();
-  const defaults = kind === 'actualites' ? NEWS_MODELS : EVENT_MODELS;
+  const defaults = MODELS[kind] ?? [];
   return configuredName && /^[_A-Za-z][_0-9A-Za-z]*$/.test(configuredName) ? [configuredName] : defaults;
 }
 
@@ -100,7 +113,11 @@ async function resolveModel(kind: ContentKind, endpoint: string, configured?: st
 async function queryRecords(model: string, endpoint: string, kind: ContentKind): Promise<HygraphRecord[]> {
   const variants = kind === 'agenda'
     ? [EVENT_GALLERY_FIELDS, EVENT_FIELDS, CORE_FIELDS, MINIMAL_FIELDS]
-    : [CORE_GALLERY_FIELDS, CORE_FIELDS, MINIMAL_FIELDS];
+    : kind === 'annonces'
+      ? [ANNOUNCEMENT_GALLERY_FIELDS, ANNOUNCEMENT_FIELDS, CORE_FIELDS, MINIMAL_FIELDS]
+      : kind === 'videos'
+        ? [VIDEO_GALLERY_FIELDS, VIDEO_FIELDS, CORE_FIELDS, MINIMAL_FIELDS]
+        : [CORE_GALLERY_FIELDS, CORE_FIELDS, MINIMAL_FIELDS];
   let lastError = 'the content could not be read';
   for (const fields of variants) {
     const { data, errors } = await fetchGraph(endpoint, queryFor(model, fields));
@@ -125,6 +142,14 @@ export function mapHygraphRecord(record: HygraphRecord, kind: ContentKind, index
   };
   const gallery = (record.gallery ?? []).map((asset) => asset?.url ?? '').filter((url) => url.startsWith('http'));
   if (gallery.length) item.gallery = gallery;
+  if (kind === 'annonces') {
+    const status = decode(String(record.statut ?? record.status ?? ''));
+    if (status) item.status = status;
+  }
+  if (kind === 'videos') {
+    const duration = decode(String(record.duree ?? record.duration ?? ''));
+    if (duration) item.duration = duration;
+  }
   if (kind === 'agenda') {
     const town = decode(String(record.ville ?? record.town ?? ''));
     const time = decode(String(record.horaire ?? record.time ?? ''));
