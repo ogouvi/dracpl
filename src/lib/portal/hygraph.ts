@@ -5,14 +5,23 @@ import { type ContentItem, type ContentKind } from './content';
 import { decode, formatFrenchDate, frenchDateParts, toParagraphs, toText } from './text';
 import { REQUEST_TIMEOUT, fallbackImage } from './wordpress';
 
-const NEWS_MODELS = ['actualites', 'news'];
-const EVENT_MODELS = ['evenements', 'events'];
+const MODELS: Partial<Record<ContentKind, string[]>> = {
+  actualites: ['actualites', 'news'],
+  agenda: ['evenements', 'events'],
+  annonces: ['annonces', 'announcements'],
+  galeries: ['galeries', 'galleries'],
+  videos: ['videos'],
+};
 
 const MINIMAL_FIELDS = 'slug title publishedAt';
 const CORE_FIELDS = 'slug title summary body { html } cover { url } date publishedAt';
 const CORE_GALLERY_FIELDS = `${CORE_FIELDS} gallery { url }`;
 const EVENT_FIELDS = `${CORE_FIELDS} categorie ville lieu horaire`;
 const EVENT_GALLERY_FIELDS = `${EVENT_FIELDS} gallery { url }`;
+const ANNOUNCEMENT_FIELDS = `${CORE_FIELDS} statut`;
+const ANNOUNCEMENT_GALLERY_FIELDS = `${CORE_GALLERY_FIELDS} statut`;
+const VIDEO_FIELDS = `${CORE_FIELDS} duree`;
+const VIDEO_GALLERY_FIELDS = `${CORE_GALLERY_FIELDS} duree`;
 
 type HygraphRecord = {
   slug?: string | null;
@@ -31,6 +40,10 @@ type HygraphRecord = {
   venue?: string | null;
   horaire?: string | null;
   time?: string | null;
+  statut?: string | null;
+  status?: string | null;
+  duree?: string | null;
+  duration?: string | null;
   sys?: { publishedAt?: string | null } | null;
 };
 
