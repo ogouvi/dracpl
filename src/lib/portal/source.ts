@@ -70,12 +70,15 @@ export async function resolvePortalItems(kind: ContentKind, env: Record<string, 
 export const getPortalItems = createServerFn({ method: 'GET' })
   .inputValidator((input: { kind?: unknown }) => {
     const kind = input?.kind;
-    if (typeof kind !== 'string' || !(kind in CATEGORY_SLUG)) throw new Error('Rubrique non connectée à une source de contenu.');
+    if (typeof kind !== 'string' || (!(kind in CATEGORY_SLUG) && !(kind in HYGRAPH_MODEL_ENV))) throw new Error('Rubrique non connectée à une source de contenu.');
     return { kind: kind as ContentKind };
   })
   .handler(async ({ data }) => resolvePortalItems(data.kind, {
     HYGRAPH_ENDPOINT: process.env['HYGRAPH_ENDPOINT'],
     HYGRAPH_NEWS_MODEL: process.env['HYGRAPH_NEWS_MODEL'],
     HYGRAPH_EVENT_MODEL: process.env['HYGRAPH_EVENT_MODEL'],
+    HYGRAPH_ANNOUNCEMENT_MODEL: process.env['HYGRAPH_ANNOUNCEMENT_MODEL'],
+    HYGRAPH_GALLERY_MODEL: process.env['HYGRAPH_GALLERY_MODEL'],
+    HYGRAPH_VIDEO_MODEL: process.env['HYGRAPH_VIDEO_MODEL'],
     WORDPRESS_URL: process.env['WORDPRESS_URL'],
   }));
