@@ -29,6 +29,23 @@ describe('Hygraph editorial content', () => {
     expect(result.items[0]?.image).toBe('https://cms.example.org/photo.jpg');
   });
 
+  it('reads the gallery pictures and keeps working when the workspace has no gallery field', async () => {
+    const item = mapHygraphRecord({ ...news, gallery: [{ url: 'https://cms.example.org/a.jpg' }, { url: 'https://cms.example.org/b.jpg' }, { url: '' }, null] }, 'actualites', 0);
+    expect(item.gallery).toEqual(['https://cms.example.org/a.jpg', 'https://cms.example.org/b.jpg']);
+    expect(mapHygraphRecord(news, 'actualites', 0).gallery).toBeUndefined();
+
+    const fetcher = vi.fn(async (_url: unknown, init?: RequestInit) => {
+      const { query } = JSON.parse(String(init?.body));
+      if (query.includes('gallery')) return new Response(JSON.stringify({ errors: [{ message: 'field gallery does not exist' }] }), { status: 200 });
+      return reply({ actualites: [news] });
+    });
+    vi.stubGlobal('fetch', fetcher);
+    const result = await resolvePortalItems('actualites', { HYGRAPH_ENDPOINT: endpoint });
+    expect(result.source).toBe('hygraph');
+    expect(result.items[0]?.slug).toBe('nouvelle-culturelle');
+    expect(result.items[0]?.gallery).toBeUndefined();
+  });
+
   it('preserves the supplied event town and time without inventing missing details', () => {
     const item = mapHygraphRecord({ ...news, ville: 'Kpalimé', horaire: '14 h 00', categorie: 'Musique' }, 'agenda', 0);
     expect(item.location).toBe('Kpalimé');

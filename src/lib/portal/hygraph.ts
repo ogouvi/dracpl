@@ -10,7 +10,9 @@ const EVENT_MODELS = ['evenements', 'events'];
 
 const MINIMAL_FIELDS = 'slug title publishedAt';
 const CORE_FIELDS = 'slug title summary body { html } cover { url } date publishedAt';
+const CORE_GALLERY_FIELDS = `${CORE_FIELDS} gallery { url }`;
 const EVENT_FIELDS = `${CORE_FIELDS} categorie ville lieu horaire`;
+const EVENT_GALLERY_FIELDS = `${EVENT_FIELDS} gallery { url }`;
 
 type HygraphRecord = {
   slug?: string | null;
@@ -20,6 +22,7 @@ type HygraphRecord = {
   date?: string | null;
   publishedAt?: string | null;
   cover?: { url?: string | null; alternativeText?: string | null } | null;
+  gallery?: Array<{ url?: string | null } | null> | null;
   categorie?: string | null;
   category?: string | null;
   ville?: string | null;
@@ -95,7 +98,9 @@ async function resolveModel(kind: ContentKind, endpoint: string, configured?: st
 }
 
 async function queryRecords(model: string, endpoint: string, kind: ContentKind): Promise<HygraphRecord[]> {
-  const variants = kind === 'agenda' ? [EVENT_FIELDS, CORE_FIELDS, MINIMAL_FIELDS] : [CORE_FIELDS, MINIMAL_FIELDS];
+  const variants = kind === 'agenda'
+    ? [EVENT_GALLERY_FIELDS, EVENT_FIELDS, CORE_FIELDS, MINIMAL_FIELDS]
+    : [CORE_GALLERY_FIELDS, CORE_FIELDS, MINIMAL_FIELDS];
   let lastError = 'the content could not be read';
   for (const fields of variants) {
     const { data, errors } = await fetchGraph(endpoint, queryFor(model, fields));
@@ -118,6 +123,8 @@ export function mapHygraphRecord(record: HygraphRecord, kind: ContentKind, index
     image: record.cover?.url || fallbackImage(index),
     body: toParagraphs(record.body && typeof record.body === 'object' && 'html' in record.body ? record.body.html : record.body),
   };
+  const gallery = (record.gallery ?? []).map((asset) => asset?.url ?? '').filter((url) => url.startsWith('http'));
+  if (gallery.length) item.gallery = gallery;
   if (kind === 'agenda') {
     const town = decode(String(record.ville ?? record.town ?? ''));
     const time = decode(String(record.horaire ?? record.time ?? ''));
