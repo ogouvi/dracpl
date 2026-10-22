@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { DetailPage } from '@/components/portal/pages';
 import { metadata, content } from '@/lib/portal/content';
-export const Route = createFileRoute('/annonces/$slug')({head:({params})=>{const item=content.annonces.find(i=>i.slug===params.slug);return metadata(item?.title||'Page introuvable',item?.summary||'Ce contenu est indisponible.');},component:Detail});
-function Detail() { const {slug}=Route.useParams();return <DetailPage kind="annonces" slug={slug}/>; }
+import { getPortalItems } from '@/lib/portal/source';
+export const Route = createFileRoute('/annonces/$slug')({loader:()=>getPortalItems({data:{kind:'annonces'}}),head:({loaderData,params})=>{const item=(loaderData?.items??content.annonces).find(i=>i.slug===params.slug);return metadata(item?.title||'Page introuvable',item?.summary||'Ce contenu est indisponible.',item?.image);},component:Detail});
+function Detail() { const {slug}=Route.useParams();const {items,source}=Route.useLoaderData();return <DetailPage kind="annonces" slug={slug} items={items} source={source}/>; }
