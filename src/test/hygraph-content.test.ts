@@ -76,6 +76,30 @@ describe('Hygraph editorial content', () => {
     expect((await loadFromHygraph(endpoint, 'actualites', 'culturalNews'))?.[0]?.title).toBe('Rencontre culturelle');
   });
 
+  it('reads announcements, galleries and videos from their own Hygraph models', async () => {
+    const fetcher = vi.fn(async (_url: unknown, init?: RequestInit) => {
+      const { query } = JSON.parse(String(init?.body));
+      if (query.startsWith('{ annonces(')) return reply({ annonces: [{ ...news, slug: 'appel-projets', statut: 'Ouvert' }] });
+      if (query.startsWith('{ galeries(')) return reply({ galeries: [{ ...news, slug: 'regards-plateaux', gallery: [{ url: 'https://cms.example.org/g1.jpg' }] }] });
+      if (query.startsWith('{ videos(')) return reply({ videos: [{ ...news, slug: 'recit-visuel', duree: '12 min' }] });
+      return reply({});
+    });
+    vi.stubGlobal('fetch', fetcher);
+
+    const annonces = await resolvePortalItems('annonces', { HYGRAPH_ENDPOINT: endpoint });
+    expect(annonces.source).toBe('hygraph');
+    expect(annonces.items[0]?.slug).toBe('appel-projets');
+    expect(annonces.items[0]?.status).toBe('Ouvert');
+
+    const galeries = await resolvePortalItems('galeries', { HYGRAPH_ENDPOINT: endpoint });
+    expect(galeries.source).toBe('hygraph');
+    expect(galeries.items[0]?.gallery).toEqual(['https://cms.example.org/g1.jpg']);
+
+    const videos = await resolvePortalItems('videos', { HYGRAPH_ENDPOINT: endpoint });
+    expect(videos.source).toBe('hygraph');
+    expect(videos.items[0]?.duration).toBe('12 min');
+  });
+
   it('falls back to WordPress when Hygraph is empty and WordPress is configured', async () => {
     vi.stubGlobal('fetch', vi.fn(async (url: string) => {
       if (url === endpoint) return reply({ actualites: [] });
