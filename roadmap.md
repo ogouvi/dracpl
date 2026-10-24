@@ -5,4 +5,5 @@
 - [x] Verify navigation, search and mobile presentation.
 - [x] Build the WordPress reading layer for news and events (falls back to demonstration content).
 - [x] Finish and test the optional Hygraph reading layer for news and events.
+- [x] Local VS Code workflow: `.env` support, `.env.example`, README steps.
 - [ ] Connect a real editorial workspace and verify published news and events (waiting for the user's Hygraph endpoint and published test items).

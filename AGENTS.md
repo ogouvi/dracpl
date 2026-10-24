@@ -14,3 +14,4 @@
 - Store demonstration editorial content in a browser-safe structured module and render it with shared archive and detail templates; this mirrors future WordPress content types and fields.
 - Keep contact submission client-side with an explicit unsent state until a delivery service is requested; never claim a message was delivered.
 - Read news and events through the shared server-side source module: try published Hygraph content when HYGRAPH_ENDPOINT is configured, then WordPress through WORDPRESS_URL, then labelled demonstration content; read configuration only inside the server-function handler to keep runtime settings server-side.
+- Keep the same setting names available locally and hosted (a git-ignored `.env` file documented by `.env.example`, and project secrets in the hosted preview) so the portal can be developed in any editor without code changes.
