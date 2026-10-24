@@ -40,6 +40,7 @@ import { Route as ProjetsIndexRouteImport } from './routes/projets.index'
 import { Route as ProjetsSlugRouteImport } from './routes/projets.$slug'
 import { Route as VideosIndexRouteImport } from './routes/videos.index'
 import { Route as VideosSlugRouteImport } from './routes/videos.$slug'
+import { Route as ApiPublicEnvCheckRouteImport } from './routes/api/public/env-check'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -196,6 +197,11 @@ const VideosSlugRoute = VideosSlugRouteImport.update({
   path: '/videos/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicEnvCheckRoute = ApiPublicEnvCheckRouteImport.update({
+  id: '/api/public/env-check',
+  path: '/api/public/env-check',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -229,6 +235,7 @@ export interface FileRoutesByFullPath {
   '/galeries/': typeof GaleriesIndexRoute
   '/projets/': typeof ProjetsIndexRoute
   '/videos/': typeof VideosIndexRoute
+  '/api/public/env-check': typeof ApiPublicEnvCheckRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -262,6 +269,7 @@ export interface FileRoutesByTo {
   '/galeries': typeof GaleriesIndexRoute
   '/projets': typeof ProjetsIndexRoute
   '/videos': typeof VideosIndexRoute
+  '/api/public/env-check': typeof ApiPublicEnvCheckRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -296,6 +304,7 @@ export interface FileRoutesById {
   '/galeries/': typeof GaleriesIndexRoute
   '/projets/': typeof ProjetsIndexRoute
   '/videos/': typeof VideosIndexRoute
+  '/api/public/env-check': typeof ApiPublicEnvCheckRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -331,6 +340,7 @@ export interface FileRouteTypes {
     | '/galeries/'
     | '/projets/'
     | '/videos/'
+    | '/api/public/env-check'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -364,6 +374,7 @@ export interface FileRouteTypes {
     | '/galeries'
     | '/projets'
     | '/videos'
+    | '/api/public/env-check'
   id:
     | '__root__'
     | '/'
@@ -397,6 +408,7 @@ export interface FileRouteTypes {
     | '/galeries/'
     | '/projets/'
     | '/videos/'
+    | '/api/public/env-check'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -431,6 +443,7 @@ export interface RootRouteChildren {
   GaleriesIndexRoute: typeof GaleriesIndexRoute
   ProjetsIndexRoute: typeof ProjetsIndexRoute
   VideosIndexRoute: typeof VideosIndexRoute
+  ApiPublicEnvCheckRoute: typeof ApiPublicEnvCheckRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -652,6 +665,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof VideosSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/env-check': {
+      id: '/api/public/env-check'
+      path: '/api/public/env-check'
+      fullPath: '/api/public/env-check'
+      preLoaderRoute: typeof ApiPublicEnvCheckRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -687,6 +707,7 @@ const rootRouteChildren: RootRouteChildren = {
   GaleriesIndexRoute: GaleriesIndexRoute,
   ProjetsIndexRoute: ProjetsIndexRoute,
   VideosIndexRoute: VideosIndexRoute,
+  ApiPublicEnvCheckRoute: ApiPublicEnvCheckRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
