@@ -20,6 +20,7 @@ const EVENT_FIELDS = `${CORE_FIELDS} categorie ville lieu horaire`;
 const EVENT_GALLERY_FIELDS = `${EVENT_FIELDS} gallery { url }`;
 const ANNOUNCEMENT_FIELDS = `${CORE_FIELDS} statut`;
 const ANNOUNCEMENT_GALLERY_FIELDS = `${CORE_GALLERY_FIELDS} statut`;
+const ANNOUNCEMENT_DOCUMENT_FIELDS = `${ANNOUNCEMENT_GALLERY_FIELDS} documents { url fileName }`;
 const VIDEO_FIELDS = `${CORE_FIELDS} duree`;
 const VIDEO_GALLERY_FIELDS = `${CORE_GALLERY_FIELDS} duree`;
 
@@ -32,6 +33,7 @@ type HygraphRecord = {
   publishedAt?: string | null;
   cover?: { url?: string | null; alternativeText?: string | null } | null;
   gallery?: Array<{ url?: string | null } | null> | null;
+  documents?: Array<{ url?: string | null; fileName?: string | null } | null> | null;
   categorie?: string | null;
   category?: string | null;
   ville?: string | null;
@@ -114,7 +116,7 @@ async function queryRecords(model: string, endpoint: string, kind: ContentKind):
   const variants = kind === 'agenda'
     ? [EVENT_GALLERY_FIELDS, EVENT_FIELDS, CORE_FIELDS, MINIMAL_FIELDS]
     : kind === 'annonces'
-      ? [ANNOUNCEMENT_GALLERY_FIELDS, ANNOUNCEMENT_FIELDS, CORE_FIELDS, MINIMAL_FIELDS]
+      ? [ANNOUNCEMENT_DOCUMENT_FIELDS, ANNOUNCEMENT_GALLERY_FIELDS, ANNOUNCEMENT_FIELDS, CORE_FIELDS, MINIMAL_FIELDS]
       : kind === 'videos'
         ? [VIDEO_GALLERY_FIELDS, VIDEO_FIELDS, CORE_FIELDS, MINIMAL_FIELDS]
         : [CORE_GALLERY_FIELDS, CORE_FIELDS, MINIMAL_FIELDS];
@@ -142,6 +144,8 @@ export function mapHygraphRecord(record: HygraphRecord, kind: ContentKind, index
   };
   const gallery = (record.gallery ?? []).map((asset) => asset?.url ?? '').filter((url) => url.startsWith('http'));
   if (gallery.length) item.gallery = gallery;
+  const documents = (record.documents ?? []).map((asset) => asset?.url?.startsWith('http') ? { url: asset.url, name: toText(String(asset.fileName ?? '')) || 'Document PDF' } : null).filter((document): document is { url: string; name: string } => document !== null);
+  if (documents.length) item.documents = documents;
   if (kind === 'annonces') {
     const status = decode(String(record.statut ?? record.status ?? ''));
     if (status) item.status = status;
