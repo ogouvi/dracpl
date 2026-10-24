@@ -79,7 +79,7 @@ describe('Hygraph editorial content', () => {
   it('reads announcements, galleries and videos from their own Hygraph models', async () => {
     const fetcher = vi.fn(async (_url: unknown, init?: RequestInit) => {
       const { query } = JSON.parse(String(init?.body));
-      if (query.startsWith('{ annonces(')) return reply({ annonces: [{ ...news, slug: 'appel-projets', statut: 'Ouvert', documents: [{ url: 'https://cms.example.org/appel-a-projets.pdf', fileName: 'appel-a-projets.pdf' }, { url: 'https://cms.example.org/renseignements.pdf', fileName: 'fiche-renseignements.pdf' }, { url: '', fileName: 'sans-adresse.pdf' }, null] }]);
+      if (query.startsWith('{ annonces(')) return reply({ annonces: [{ ...news, slug: 'appel-projets', statut: 'Ouvert', documents: [{ url: 'https://cms.example.org/appel-a-projets.pdf', fileName: 'appel-a-projets.pdf' }, { url: 'https://cms.example.org/renseignements.pdf', fileName: 'fiche-renseignements.pdf' }, { url: '', fileName: 'sans-adresse.pdf' }, null] }] });
       if (query.startsWith('{ galeries(')) return reply({ galeries: [{ ...news, slug: 'regards-plateaux', gallery: [{ url: 'https://cms.example.org/g1.jpg' }] }] });
       if (query.startsWith('{ videos(')) return reply({ videos: [{ ...news, slug: 'recit-visuel', duree: '12 min' }] });
       return reply({});
