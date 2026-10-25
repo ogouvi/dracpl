@@ -24,17 +24,36 @@ const ANNOUNCEMENT_DOCUMENT_FIELDS = `${ANNOUNCEMENT_GALLERY_FIELDS} documents {
 const VIDEO_FIELDS = `${CORE_FIELDS} duree`;
 const VIDEO_GALLERY_FIELDS = `${CORE_GALLERY_FIELDS} duree`;
 
+// French field names, as created in the regional Hygraph workspace.
+const FR_MINIMAL = 'slug titre publishedAt';
+const FR_CORE = 'slug titre sommaire contenue { html } cover { url } publishedAt';
+const FR_FIELDS: Partial<Record<ContentKind, string[]>> = {
+  actualites: [`${FR_CORE} publieLe galerie { url }`, `${FR_CORE} publieLe`, FR_CORE],
+  agenda: [`${FR_CORE} publieLe date lieu horaire categories`, `${FR_CORE} date lieu horaire`, FR_CORE],
+  annonces: [`${FR_CORE} date statut categorie gallery { url } documents { url fileName }`, `${FR_CORE} date statut`, FR_CORE],
+  galeries: [`${FR_CORE} gallery { url }`, FR_CORE],
+  videos: [`${FR_CORE} duree`, FR_CORE],
+};
+
+type Asset = { url?: string | null; fileName?: string | null } | null;
+
 type HygraphRecord = {
   slug?: string | null;
   title?: string | null;
+  titre?: string | null;
   summary?: string | null;
+  sommaire?: string | null;
   body?: unknown;
+  contenue?: unknown;
   date?: string | null;
+  publieLe?: string | null;
   publishedAt?: string | null;
   cover?: { url?: string | null; alternativeText?: string | null } | null;
-  gallery?: Array<{ url?: string | null } | null> | null;
-  documents?: Array<{ url?: string | null; fileName?: string | null } | null> | null;
+  gallery?: Asset[] | Asset;
+  galerie?: Asset[] | Asset;
+  documents?: Asset[] | Asset;
   categorie?: string | null;
+  categories?: string | string[] | null;
   category?: string | null;
   ville?: string | null;
   town?: string | null;
@@ -49,11 +68,26 @@ type HygraphRecord = {
   sys?: { publishedAt?: string | null } | null;
 };
 
+function assets(value: Asset[] | Asset | undefined): Asset[] {
+  if (!value) return [];
+  return Array.isArray(value) ? value : [value];
+}
+
+// Turns a stored choice like « musiqueEtDanse » into « Musique et danse ».
+function humanize(value: string): string {
+  const spaced = value.replace(/([a-zà-ÿ])([A-ZÀ-Þ])/g, '$1 $2').replace(/[_-]+/g, ' ').toLowerCase().trim();
+  return spaced ? spaced.charAt(0).toUpperCase() + spaced.slice(1) : '';
+}
+
+const ISO = /^\d{4}-\d{2}-\d{2}/;
+
 // Keeps the workspace name between calls so a page view needs a single request.
 const modelCache = new Map<string, string>();
+const fieldCache = new Map<string, string>();
 
 export function resetHygraphModels(): void {
   modelCache.clear();
+  fieldCache.clear();
 }
 
 function modelsFor(kind: ContentKind, configured = ''): string[] {
@@ -70,7 +104,8 @@ async function fetchGraph(endpoint: string, query: string): Promise<{ data?: Rec
     signal: AbortSignal.timeout(REQUEST_TIMEOUT),
     cache: 'no-store',
   });
-  if (!res.ok) throw new Error(`Hygraph request failed [${res.status}]`);
+  // Hygraph answers an unknown field with status 400 and a readable error list, which lets the next field variant be tried.
+  if (!res.ok && res.status !== 400) throw new Error(`Hygraph request failed [${res.status}]`);
   return (await res.json()) as { data?: Record<string, unknown> | null; errors?: Array<{ message?: string }> };
 }
 
@@ -95,7 +130,8 @@ async function resolveModel(kind: ContentKind, endpoint: string, configured?: st
   if (cached) return cached;
   for (const model of modelsFor(kind, configured)) {
     try {
-      const { data, errors } = await fetchGraph(endpoint, queryFor(model, MINIMAL_FIELDS));
+      let { data, errors } = await fetchGraph(endpoint, queryFor(model, MINIMAL_FIELDS));
+      if (!recordsFrom(data, model)) ({ data, errors } = await fetchGraph(endpoint, queryFor(model, FR_MINIMAL)));
       if (recordsFrom(data, model)) {
         modelCache.set(key, model);
         return model;
@@ -113,38 +149,55 @@ async function resolveModel(kind: ContentKind, endpoint: string, configured?: st
 }
 
 async function queryRecords(model: string, endpoint: string, kind: ContentKind): Promise<HygraphRecord[]> {
-  const variants = kind === 'agenda'
+  const english = kind === 'agenda'
     ? [EVENT_GALLERY_FIELDS, EVENT_FIELDS, CORE_FIELDS, MINIMAL_FIELDS]
     : kind === 'annonces'
       ? [ANNOUNCEMENT_DOCUMENT_FIELDS, ANNOUNCEMENT_GALLERY_FIELDS, ANNOUNCEMENT_FIELDS, CORE_FIELDS, MINIMAL_FIELDS]
       : kind === 'videos'
         ? [VIDEO_GALLERY_FIELDS, VIDEO_FIELDS, CORE_FIELDS, MINIMAL_FIELDS]
         : [CORE_GALLERY_FIELDS, CORE_FIELDS, MINIMAL_FIELDS];
+  const french = [...(FR_FIELDS[kind] ?? []), FR_MINIMAL];
+  const cacheKey = `${endpoint}:${model}:fields`;
+  const known = fieldCache.get(cacheKey);
+  // Remembering the field set that worked keeps each page view to one request (Hygraph limits request bursts).
+  let variants = known ? [known, ...english, ...french] : [...english, ...french];
   let lastError = 'the content could not be read';
-  for (const fields of variants) {
+  for (let i = 0; i < variants.length; i++) {
+    const fields = variants[i] ?? '';
     const { data, errors } = await fetchGraph(endpoint, queryFor(model, fields));
     const records = recordsFrom(data, model);
-    if (records) return records;
+    if (records) {
+      fieldCache.set(cacheKey, fields);
+      return records;
+    }
     lastError = graphError(errors) ?? lastError;
-    if (!/schema|field|does not exist|Unknown type|undefined|selection/i.test(lastError)) break;
+    if (!/schema|field|does not exist|Unknown type|undefined|selection|cannot query/i.test(lastError)) break;
+    // A workspace built with French field names: skip the remaining English attempts.
+    if (/field 'title' is not defined/i.test(lastError) && english.includes(fields)) {
+      variants = french;
+      i = -1;
+    }
   }
   throw new Error(`Hygraph query failed for « ${model} »: ${lastError}`);
 }
 
 export function mapHygraphRecord(record: HygraphRecord, kind: ContentKind, index: number): ContentItem {
-  const iso = typeof record.date === 'string' && record.date ? record.date : typeof record.publishedAt === 'string' && record.publishedAt ? record.publishedAt : record.sys?.publishedAt ?? '';
+  const rawDate = String(record.date ?? '').trim();
+  const iso = ISO.test(rawDate) ? rawDate : String(record.publieLe ?? '') || String(record.publishedAt ?? '') || (record.sys?.publishedAt ?? '');
+  const rawCategory = Array.isArray(record.categories) ? record.categories[0] ?? '' : record.categories ?? '';
+  const body = record.contenue ?? record.body;
   const item: ContentItem = {
     slug: String(record.slug ?? '') || `hygraph-${index}`,
-    title: toText(String(record.title ?? '')) || 'Sans titre',
-    category: decode(String(record.categorie ?? record.category ?? '')) || 'Plateaux',
+    title: toText(String(record.titre ?? record.title ?? '')) || 'Sans titre',
+    category: decode(String(record.categorie ?? record.category ?? '')) || humanize(String(rawCategory)) || 'Plateaux',
     date: iso ? formatFrenchDate(iso) : '',
-    summary: toText(String(record.summary ?? '')),
+    summary: toText(String(record.sommaire ?? record.summary ?? '')),
     image: record.cover?.url || fallbackImage(index),
-    body: toParagraphs(record.body && typeof record.body === 'object' && 'html' in record.body ? record.body.html : record.body),
+    body: toParagraphs(body && typeof body === 'object' && 'html' in body ? (body as { html: unknown }).html : body),
   };
-  const gallery = (record.gallery ?? []).map((asset) => asset?.url ?? '').filter((url) => url.startsWith('http'));
+  const gallery = [...assets(record.galerie), ...assets(record.gallery)].map((asset) => asset?.url ?? '').filter((url) => url.startsWith('http'));
   if (gallery.length) item.gallery = gallery;
-  const documents = (record.documents ?? []).map((asset) => asset?.url?.startsWith('http') ? { url: asset.url, name: toText(String(asset.fileName ?? '')) || 'Document PDF' } : null).filter((document): document is { url: string; name: string } => document !== null);
+  const documents = assets(record.documents).map((asset) => asset?.url?.startsWith('http') ? { url: asset.url, name: toText(String(asset.fileName ?? '')) || 'Document' } : null).filter((document): document is { url: string; name: string } => document !== null);
   if (documents.length) item.documents = documents;
   if (kind === 'annonces') {
     const status = decode(String(record.statut ?? record.status ?? ''));
@@ -155,14 +208,26 @@ export function mapHygraphRecord(record: HygraphRecord, kind: ContentKind, index
     if (duration) item.duration = duration;
   }
   if (kind === 'agenda') {
-    const town = decode(String(record.ville ?? record.town ?? ''));
+    const town = decode(String(record.ville ?? record.town ?? record.lieu ?? ''));
     const time = decode(String(record.horaire ?? record.time ?? ''));
     if (town) item.location = town;
     if (time) item.time = time;
-    const parts = frenchDateParts(iso);
+    const parts = ISO.test(rawDate) ? frenchDateParts(rawDate) : null;
+    const typed = /^(\d{1,2})\s+([A-Za-zÀ-ÿ.]+)/.exec(rawDate);
     if (parts) {
       item.day = parts.day;
       item.month = parts.month;
+    } else if (typed) {
+      // An event date typed as text, e.g. « 07 Nov ».
+      item.day = typed[1] ?? '';
+      item.month = (typed[2] ?? '').toLowerCase();
+      item.date = rawDate;
+    } else {
+      const fallback = frenchDateParts(iso);
+      if (fallback) {
+        item.day = fallback.day;
+        item.month = fallback.month;
+      }
     }
   }
   return item;
