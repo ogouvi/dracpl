@@ -154,14 +154,27 @@ async function queryRecords(model: string, endpoint: string, kind: ContentKind):
       : kind === 'videos'
         ? [VIDEO_GALLERY_FIELDS, VIDEO_FIELDS, CORE_FIELDS, MINIMAL_FIELDS]
         : [CORE_GALLERY_FIELDS, CORE_FIELDS, MINIMAL_FIELDS];
-  const variants = [...english.slice(0, -1), ...(FR_FIELDS[kind] ?? []), MINIMAL_FIELDS, FR_MINIMAL];
+  const french = [...(FR_FIELDS[kind] ?? []), FR_MINIMAL];
+  const cacheKey = `${endpoint}:${model}:fields`;
+  const known = fieldCache.get(cacheKey);
+  // Remembering the field set that worked keeps each page view to one request (Hygraph limits request bursts).
+  let variants = known ? [known, ...english, ...french] : [...english, ...french];
   let lastError = 'the content could not be read';
-  for (const fields of variants) {
+  for (let i = 0; i < variants.length; i++) {
+    const fields = variants[i] ?? '';
     const { data, errors } = await fetchGraph(endpoint, queryFor(model, fields));
     const records = recordsFrom(data, model);
-    if (records) return records;
+    if (records) {
+      fieldCache.set(cacheKey, fields);
+      return records;
+    }
     lastError = graphError(errors) ?? lastError;
     if (!/schema|field|does not exist|Unknown type|undefined|selection|cannot query/i.test(lastError)) break;
+    // A workspace built with French field names: skip the remaining English attempts.
+    if (/field 'title' is not defined/i.test(lastError) && english.includes(fields)) {
+      variants = french;
+      i = -1;
+    }
   }
   throw new Error(`Hygraph query failed for « ${model} »: ${lastError}`);
 }
