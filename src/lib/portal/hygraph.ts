@@ -24,17 +24,36 @@ const ANNOUNCEMENT_DOCUMENT_FIELDS = `${ANNOUNCEMENT_GALLERY_FIELDS} documents {
 const VIDEO_FIELDS = `${CORE_FIELDS} duree`;
 const VIDEO_GALLERY_FIELDS = `${CORE_GALLERY_FIELDS} duree`;
 
+// French field names, as created in the regional Hygraph workspace.
+const FR_MINIMAL = 'slug titre publishedAt';
+const FR_CORE = 'slug titre sommaire contenue { html } cover { url } publishedAt';
+const FR_FIELDS: Partial<Record<ContentKind, string[]>> = {
+  actualites: [`${FR_CORE} publieLe galerie { url }`, `${FR_CORE} publieLe`, FR_CORE],
+  agenda: [`${FR_CORE} publieLe date lieu horaire categories`, `${FR_CORE} date lieu horaire`, FR_CORE],
+  annonces: [`${FR_CORE} date statut categorie gallery { url } documents { url fileName }`, `${FR_CORE} date statut`, FR_CORE],
+  galeries: [`${FR_CORE} gallery { url }`, FR_CORE],
+  videos: [`${FR_CORE} duree`, FR_CORE],
+};
+
+type Asset = { url?: string | null; fileName?: string | null } | null;
+
 type HygraphRecord = {
   slug?: string | null;
   title?: string | null;
+  titre?: string | null;
   summary?: string | null;
+  sommaire?: string | null;
   body?: unknown;
+  contenue?: unknown;
   date?: string | null;
+  publieLe?: string | null;
   publishedAt?: string | null;
   cover?: { url?: string | null; alternativeText?: string | null } | null;
-  gallery?: Array<{ url?: string | null } | null> | null;
-  documents?: Array<{ url?: string | null; fileName?: string | null } | null> | null;
+  gallery?: Asset[] | Asset;
+  galerie?: Asset[] | Asset;
+  documents?: Asset[] | Asset;
   categorie?: string | null;
+  categories?: string | string[] | null;
   category?: string | null;
   ville?: string | null;
   town?: string | null;
@@ -48,6 +67,19 @@ type HygraphRecord = {
   duration?: string | null;
   sys?: { publishedAt?: string | null } | null;
 };
+
+function assets(value: Asset[] | Asset | undefined): Asset[] {
+  if (!value) return [];
+  return Array.isArray(value) ? value : [value];
+}
+
+// Turns a stored choice like « musiqueEtDanse » into « Musique et danse ».
+function humanize(value: string): string {
+  const spaced = value.replace(/([a-zà-ÿ])([A-ZÀ-Þ])/g, '$1 $2').replace(/[_-]+/g, ' ').toLowerCase().trim();
+  return spaced ? spaced.charAt(0).toUpperCase() + spaced.slice(1) : '';
+}
+
+const ISO = /^\d{4}-\d{2}-\d{2}/;
 
 // Keeps the workspace name between calls so a page view needs a single request.
 const modelCache = new Map<string, string>();
@@ -95,7 +127,8 @@ async function resolveModel(kind: ContentKind, endpoint: string, configured?: st
   if (cached) return cached;
   for (const model of modelsFor(kind, configured)) {
     try {
-      const { data, errors } = await fetchGraph(endpoint, queryFor(model, MINIMAL_FIELDS));
+      let { data, errors } = await fetchGraph(endpoint, queryFor(model, MINIMAL_FIELDS));
+      if (!recordsFrom(data, model)) ({ data, errors } = await fetchGraph(endpoint, queryFor(model, FR_MINIMAL)));
       if (recordsFrom(data, model)) {
         modelCache.set(key, model);
         return model;
