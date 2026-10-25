@@ -102,7 +102,8 @@ async function fetchGraph(endpoint: string, query: string): Promise<{ data?: Rec
     signal: AbortSignal.timeout(REQUEST_TIMEOUT),
     cache: 'no-store',
   });
-  if (!res.ok) throw new Error(`Hygraph request failed [${res.status}]`);
+  // Hygraph answers an unknown field with status 400 and a readable error list, which lets the next field variant be tried.
+  if (!res.ok && res.status !== 400) throw new Error(`Hygraph request failed [${res.status}]`);
   return (await res.json()) as { data?: Record<string, unknown> | null; errors?: Array<{ message?: string }> };
 }
 
