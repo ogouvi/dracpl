@@ -83,9 +83,11 @@ const ISO = /^\d{4}-\d{2}-\d{2}/;
 
 // Keeps the workspace name between calls so a page view needs a single request.
 const modelCache = new Map<string, string>();
+const fieldCache = new Map<string, string>();
 
 export function resetHygraphModels(): void {
   modelCache.clear();
+  fieldCache.clear();
 }
 
 function modelsFor(kind: ContentKind, configured = ''): string[] {
