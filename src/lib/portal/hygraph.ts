@@ -146,38 +146,42 @@ async function resolveModel(kind: ContentKind, endpoint: string, configured?: st
 }
 
 async function queryRecords(model: string, endpoint: string, kind: ContentKind): Promise<HygraphRecord[]> {
-  const variants = kind === 'agenda'
+  const english = kind === 'agenda'
     ? [EVENT_GALLERY_FIELDS, EVENT_FIELDS, CORE_FIELDS, MINIMAL_FIELDS]
     : kind === 'annonces'
       ? [ANNOUNCEMENT_DOCUMENT_FIELDS, ANNOUNCEMENT_GALLERY_FIELDS, ANNOUNCEMENT_FIELDS, CORE_FIELDS, MINIMAL_FIELDS]
       : kind === 'videos'
         ? [VIDEO_GALLERY_FIELDS, VIDEO_FIELDS, CORE_FIELDS, MINIMAL_FIELDS]
         : [CORE_GALLERY_FIELDS, CORE_FIELDS, MINIMAL_FIELDS];
+  const variants = [...english.slice(0, -1), ...(FR_FIELDS[kind] ?? []), MINIMAL_FIELDS, FR_MINIMAL];
   let lastError = 'the content could not be read';
   for (const fields of variants) {
     const { data, errors } = await fetchGraph(endpoint, queryFor(model, fields));
     const records = recordsFrom(data, model);
     if (records) return records;
     lastError = graphError(errors) ?? lastError;
-    if (!/schema|field|does not exist|Unknown type|undefined|selection/i.test(lastError)) break;
+    if (!/schema|field|does not exist|Unknown type|undefined|selection|cannot query/i.test(lastError)) break;
   }
   throw new Error(`Hygraph query failed for « ${model} »: ${lastError}`);
 }
 
 export function mapHygraphRecord(record: HygraphRecord, kind: ContentKind, index: number): ContentItem {
-  const iso = typeof record.date === 'string' && record.date ? record.date : typeof record.publishedAt === 'string' && record.publishedAt ? record.publishedAt : record.sys?.publishedAt ?? '';
+  const rawDate = String(record.date ?? '').trim();
+  const iso = ISO.test(rawDate) ? rawDate : String(record.publieLe ?? '') || String(record.publishedAt ?? '') || (record.sys?.publishedAt ?? '');
+  const rawCategory = Array.isArray(record.categories) ? record.categories[0] ?? '' : record.categories ?? '';
+  const body = record.contenue ?? record.body;
   const item: ContentItem = {
     slug: String(record.slug ?? '') || `hygraph-${index}`,
-    title: toText(String(record.title ?? '')) || 'Sans titre',
-    category: decode(String(record.categorie ?? record.category ?? '')) || 'Plateaux',
+    title: toText(String(record.titre ?? record.title ?? '')) || 'Sans titre',
+    category: decode(String(record.categorie ?? record.category ?? '')) || humanize(String(rawCategory)) || 'Plateaux',
     date: iso ? formatFrenchDate(iso) : '',
-    summary: toText(String(record.summary ?? '')),
+    summary: toText(String(record.sommaire ?? record.summary ?? '')),
     image: record.cover?.url || fallbackImage(index),
-    body: toParagraphs(record.body && typeof record.body === 'object' && 'html' in record.body ? record.body.html : record.body),
+    body: toParagraphs(body && typeof body === 'object' && 'html' in body ? (body as { html: unknown }).html : body),
   };
-  const gallery = (record.gallery ?? []).map((asset) => asset?.url ?? '').filter((url) => url.startsWith('http'));
+  const gallery = [...assets(record.galerie), ...assets(record.gallery)].map((asset) => asset?.url ?? '').filter((url) => url.startsWith('http'));
   if (gallery.length) item.gallery = gallery;
-  const documents = (record.documents ?? []).map((asset) => asset?.url?.startsWith('http') ? { url: asset.url, name: toText(String(asset.fileName ?? '')) || 'Document PDF' } : null).filter((document): document is { url: string; name: string } => document !== null);
+  const documents = assets(record.documents).map((asset) => asset?.url?.startsWith('http') ? { url: asset.url, name: toText(String(asset.fileName ?? '')) || 'Document' } : null).filter((document): document is { url: string; name: string } => document !== null);
   if (documents.length) item.documents = documents;
   if (kind === 'annonces') {
     const status = decode(String(record.statut ?? record.status ?? ''));
@@ -188,14 +192,26 @@ export function mapHygraphRecord(record: HygraphRecord, kind: ContentKind, index
     if (duration) item.duration = duration;
   }
   if (kind === 'agenda') {
-    const town = decode(String(record.ville ?? record.town ?? ''));
+    const town = decode(String(record.ville ?? record.town ?? record.lieu ?? ''));
     const time = decode(String(record.horaire ?? record.time ?? ''));
     if (town) item.location = town;
     if (time) item.time = time;
-    const parts = frenchDateParts(iso);
+    const parts = ISO.test(rawDate) ? frenchDateParts(rawDate) : null;
+    const typed = /^(\d{1,2})\s+([A-Za-zÀ-ÿ.]+)/.exec(rawDate);
     if (parts) {
       item.day = parts.day;
       item.month = parts.month;
+    } else if (typed) {
+      // An event date typed as text, e.g. « 07 Nov ».
+      item.day = typed[1] ?? '';
+      item.month = (typed[2] ?? '').toLowerCase();
+      item.date = rawDate;
+    } else {
+      const fallback = frenchDateParts(iso);
+      if (fallback) {
+        item.day = fallback.day;
+        item.month = fallback.month;
+      }
     }
   }
   return item;
