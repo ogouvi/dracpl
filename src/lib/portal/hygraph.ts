@@ -1,20 +1,19 @@
 // Reads news and events from a Hygraph content workspace through its public content API.
 // Nothing here is needed until the HYGRAPH_ENDPOINT setting is filled in.
 
-import { type ContentItem, type ContentKind } from './content';
-import { decode, formatFrenchDate, frenchDateParts, toParagraphs, toText } from './text';
-import { REQUEST_TIMEOUT, fallbackImage } from './wordpress';
+import { type ContentItem, type ContentKind } from "./content";
+import { decode, formatFrenchDate, frenchDateParts, toParagraphs, toText } from "./text";
 
 const MODELS: Partial<Record<ContentKind, string[]>> = {
-  actualites: ['actualites', 'news'],
-  agenda: ['evenements', 'events'],
-  annonces: ['annonces', 'announcements'],
-  galeries: ['galeries', 'galleries'],
-  videos: ['videos'],
+  actualites: ["actualites", "news"],
+  agenda: ["evenements", "events"],
+  annonces: ["annonces", "announcements"],
+  galeries: ["galeries", "galleries"],
+  videos: ["videos"],
 };
 
-const MINIMAL_FIELDS = 'slug title publishedAt';
-const CORE_FIELDS = 'slug title summary body { html } cover { url } date publishedAt';
+const MINIMAL_FIELDS = "slug title publishedAt";
+const CORE_FIELDS = "slug title summary body { html } cover { url } date publishedAt";
 const CORE_GALLERY_FIELDS = `${CORE_FIELDS} gallery { url }`;
 const EVENT_FIELDS = `${CORE_FIELDS} categorie ville lieu horaire`;
 const EVENT_GALLERY_FIELDS = `${EVENT_FIELDS} gallery { url }`;
@@ -90,31 +89,50 @@ export function resetHygraphModels(): void {
   fieldCache.clear();
 }
 
-function modelsFor(kind: ContentKind, configured = ''): string[] {
+function modelsFor(kind: ContentKind, configured = ""): string[] {
   const configuredName = configured.trim();
   const defaults = MODELS[kind] ?? [];
-  return configuredName && /^[_A-Za-z][_0-9A-Za-z]*$/.test(configuredName) ? [configuredName] : defaults;
+  return configuredName && /^[_A-Za-z][_0-9A-Za-z]*$/.test(configuredName)
+    ? [configuredName]
+    : defaults;
 }
 
-async function fetchGraph(endpoint: string, query: string): Promise<{ data?: Record<string, unknown> | null; errors?: Array<{ message?: string }> }> {
+async function fetchGraph(
+  endpoint: string,
+  query: string,
+): Promise<{ data?: Record<string, unknown> | null; errors?: Array<{ message?: string }> }> {
   const res = await fetch(endpoint, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+    method: "POST",
+    headers: { "Content-Type": "application/json", Accept: "application/json" },
     body: JSON.stringify({ query }),
     signal: AbortSignal.timeout(REQUEST_TIMEOUT),
-    cache: 'no-store',
+    cache: "no-store",
   });
+<<<<<<< Updated upstream
   // Hygraph answers an unknown field with status 400 and a readable error list, which lets the next field variant be tried.
   if (!res.ok && res.status !== 400) throw new Error(`Hygraph request failed [${res.status}]`);
   return (await res.json()) as { data?: Record<string, unknown> | null; errors?: Array<{ message?: string }> };
+=======
+  if (!res.ok) throw new Error(`Hygraph request failed [${res.status}]`);
+  return (await res.json()) as {
+    data?: Record<string, unknown> | null;
+    errors?: Array<{ message?: string }>;
+  };
+>>>>>>> Stashed changes
 }
 
 function graphError(errors: Array<{ message?: string }> | undefined): string | null {
-  const message = (errors ?? []).map((error) => error?.message ?? '').join(' ').trim();
+  const message = (errors ?? [])
+    .map((error) => error?.message ?? "")
+    .join(" ")
+    .trim();
   return message || null;
 }
 
-function recordsFrom(data: Record<string, unknown> | null | undefined, model: string): HygraphRecord[] | null {
+function recordsFrom(
+  data: Record<string, unknown> | null | undefined,
+  model: string,
+): HygraphRecord[] | null {
   const records = data?.[model];
   return Array.isArray(records) ? (records as HygraphRecord[]) : null;
 }
@@ -124,8 +142,12 @@ function queryFor(model: string, fields: string): string {
 }
 
 // Finds the workspace name that actually holds this section of the portal.
-async function resolveModel(kind: ContentKind, endpoint: string, configured?: string): Promise<string | null> {
-  const key = `${endpoint}:${kind}:${configured ?? ''}`;
+async function resolveModel(
+  kind: ContentKind,
+  endpoint: string,
+  configured?: string,
+): Promise<string | null> {
+  const key = `${endpoint}:${kind}:${configured ?? ""}`;
   const cached = modelCache.get(key);
   if (cached) return cached;
   for (const model of modelsFor(kind, configured)) {
@@ -148,6 +170,7 @@ async function resolveModel(kind: ContentKind, endpoint: string, configured?: st
   return null;
 }
 
+<<<<<<< Updated upstream
 async function queryRecords(model: string, endpoint: string, kind: ContentKind): Promise<HygraphRecord[]> {
   const english = kind === 'agenda'
     ? [EVENT_GALLERY_FIELDS, EVENT_FIELDS, CORE_FIELDS, MINIMAL_FIELDS]
@@ -164,6 +187,23 @@ async function queryRecords(model: string, endpoint: string, kind: ContentKind):
   let lastError = 'the content could not be read';
   for (let i = 0; i < variants.length; i++) {
     const fields = variants[i] ?? '';
+=======
+async function queryRecords(
+  model: string,
+  endpoint: string,
+  kind: ContentKind,
+): Promise<HygraphRecord[]> {
+  const variants =
+    kind === "agenda"
+      ? [EVENT_GALLERY_FIELDS, EVENT_FIELDS, CORE_FIELDS, MINIMAL_FIELDS]
+      : kind === "annonces"
+        ? [ANNOUNCEMENT_GALLERY_FIELDS, ANNOUNCEMENT_FIELDS, CORE_FIELDS, MINIMAL_FIELDS]
+        : kind === "videos"
+          ? [VIDEO_GALLERY_FIELDS, VIDEO_FIELDS, CORE_FIELDS, MINIMAL_FIELDS]
+          : [CORE_GALLERY_FIELDS, CORE_FIELDS, MINIMAL_FIELDS];
+  let lastError = "the content could not be read";
+  for (const fields of variants) {
+>>>>>>> Stashed changes
     const { data, errors } = await fetchGraph(endpoint, queryFor(model, fields));
     const records = recordsFrom(data, model);
     if (records) {
@@ -181,6 +221,7 @@ async function queryRecords(model: string, endpoint: string, kind: ContentKind):
   throw new Error(`Hygraph query failed for « ${model} »: ${lastError}`);
 }
 
+<<<<<<< Updated upstream
 export function mapHygraphRecord(record: HygraphRecord, kind: ContentKind, index: number): ContentItem {
   const rawDate = String(record.date ?? '').trim();
   const iso = ISO.test(rawDate) ? rawDate : String(record.publieLe ?? '') || String(record.publishedAt ?? '') || (record.sys?.publishedAt ?? '');
@@ -201,15 +242,53 @@ export function mapHygraphRecord(record: HygraphRecord, kind: ContentKind, index
   if (documents.length) item.documents = documents;
   if (kind === 'annonces') {
     const status = decode(String(record.statut ?? record.status ?? ''));
+=======
+export function mapHygraphRecord(
+  record: HygraphRecord,
+  kind: ContentKind,
+  index: number,
+): ContentItem {
+  const iso =
+    typeof record.date === "string" && record.date
+      ? record.date
+      : typeof record.publishedAt === "string" && record.publishedAt
+        ? record.publishedAt
+        : (record.sys?.publishedAt ?? "");
+  const item: ContentItem = {
+    slug: String(record.slug ?? "") || `hygraph-${index}`,
+    title: toText(String(record.title ?? "")) || "Sans titre",
+    category: decode(String(record.categorie ?? record.category ?? "")) || "Plateaux",
+    date: iso ? formatFrenchDate(iso) : "",
+    summary: toText(String(record.summary ?? "")),
+    image: record.cover?.url || fallbackImage(index),
+    body: toParagraphs(
+      record.body && typeof record.body === "object" && "html" in record.body
+        ? record.body.html
+        : record.body,
+    ),
+  };
+  const gallery = (record.gallery ?? [])
+    .map((asset) => asset?.url ?? "")
+    .filter((url) => url.startsWith("http"));
+  if (gallery.length) item.gallery = gallery;
+  if (kind === "annonces") {
+    const status = decode(String(record.statut ?? record.status ?? ""));
+>>>>>>> Stashed changes
     if (status) item.status = status;
   }
-  if (kind === 'videos') {
-    const duration = decode(String(record.duree ?? record.duration ?? ''));
+  if (kind === "videos") {
+    const duration = decode(String(record.duree ?? record.duration ?? ""));
     if (duration) item.duration = duration;
   }
+<<<<<<< Updated upstream
   if (kind === 'agenda') {
     const town = decode(String(record.ville ?? record.town ?? record.lieu ?? ''));
     const time = decode(String(record.horaire ?? record.time ?? ''));
+=======
+  if (kind === "agenda") {
+    const town = decode(String(record.ville ?? record.town ?? ""));
+    const time = decode(String(record.horaire ?? record.time ?? ""));
+>>>>>>> Stashed changes
     if (town) item.location = town;
     if (time) item.time = time;
     const parts = ISO.test(rawDate) ? frenchDateParts(rawDate) : null;
@@ -234,7 +313,11 @@ export function mapHygraphRecord(record: HygraphRecord, kind: ContentKind, index
 }
 
 // Returns null whenever Hygraph holds nothing usable, so the portal can fall back quietly.
-export async function loadFromHygraph(endpoint: string, kind: ContentKind, configuredModel?: string): Promise<ContentItem[] | null> {
+export async function loadFromHygraph(
+  endpoint: string,
+  kind: ContentKind,
+  configuredModel?: string,
+): Promise<ContentItem[] | null> {
   const model = await resolveModel(kind, endpoint, configuredModel);
   if (!model) return null;
   try {
@@ -242,8 +325,9 @@ export async function loadFromHygraph(endpoint: string, kind: ContentKind, confi
     if (!records.length) return null;
     return records.map((record, index) => mapHygraphRecord(record, kind, index));
   } catch (error) {
-    console.warn(`Hygraph indisponible pour « ${kind} » : ${error instanceof Error ? error.message : String(error)}`);
+    console.warn(
+      `Hygraph indisponible pour « ${kind} » : ${error instanceof Error ? error.message : String(error)}`,
+    );
     return null;
   }
 }
-

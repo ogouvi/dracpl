@@ -1,24 +1,228 @@
-import { Link, useNavigate } from '@tanstack/react-router';
-import { useEffect, useState } from 'react';
-import { Search, ArrowRight, ArrowLeft, MapPin, CalendarDays, Clock, Download, Share2, X, Play, Pause, Check, Landmark, Palette, Users, BookOpen, Globe, Mail } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { content, images, pageInfo, pagePaths, type ContentKind, type ContentItem } from '@/lib/portal/content';
-import { PageBanner, ContactBand } from './chrome';
-import type { ContentSource } from '@/lib/portal/source';
-import { ContentCard, AnnouncementCard, HeritageCards, PartnerGrid, SectionHeading, ItemLink } from './cards';
-const kinds=Object.keys(content) as ContentKind[];
-const searchable=kinds.flatMap(kind=>content[kind].map(item=>({item,kind})));
-const normalize=(s:string)=>s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
-function Pagination({page,setPage,total}:{page:number;setPage:(v:number)=>void;total:number}) { return total>1?<nav className="pagination" aria-label="Pagination"><Button variant="outline" size="icon" disabled={page===1} aria-label="Page précédente" onClick={()=>setPage(page-1)}><ArrowLeft/></Button>{Array.from({length:total},(_,i)=><Button key={i} variant={page===i+1?'default':'outline'} aria-current={page===i+1?'page':undefined} onClick={()=>setPage(i+1)}>{i+1}</Button>)}<Button variant="outline" size="icon" disabled={page===total} aria-label="Page suivante" onClick={()=>setPage(page+1)}><ArrowRight/></Button></nav>:null; }
-export function ArchivePage({kind, items = content[kind], source = 'demo'}:{kind:ContentKind; items?:ContentItem[]; source?:ContentSource}) {
- const [query,setQuery]=useState('');const [category,setCategory]=useState('');const [location,setLocation]=useState('');const [page,setPage]=useState(1);const info=pageInfo[kind];
- const filtered=items.filter(item=>normalize(item.title+' '+item.summary).includes(normalize(query))&&(!category||item.category===category)&&(!location||item.location===location)); const pageSize=kind==='actualites'?3:6;
- return <><PageBanner {...info}/><section className="section"><div className="wrap"><div className="filters"><label className="search-field"><Search/><input aria-label={`Rechercher : ${info.title}`} placeholder="Rechercher dans cette rubrique…" value={query} onChange={e=>{setQuery(e.target.value);setPage(1);}}/></label><select aria-label="Filtrer par catégorie" value={category} onChange={e=>{setCategory(e.target.value);setPage(1);}}><option value="">Toutes les catégories</option>{[...new Set(items.map(i=>i.category))].map(c=><option key={c}>{c}</option>)}</select>{(kind==='agenda'||kind==='artistes')&&<select aria-label="Filtrer par localité" value={location} onChange={e=>{setLocation(e.target.value);setPage(1);}}><option value="">Toutes les localités</option>{[...new Set(items.map(i=>i.location).filter(Boolean))].map(c=><option key={c}>{c}</option>)}</select>}</div><p className="meta mb-5" aria-live="polite">{filtered.length} {filtered.length>1?'résultats':'résultat'}</p>{filtered.length?<div className="grid-3">{filtered.slice((page-1)*pageSize,page*pageSize).map(item=>kind==='annonces'?<AnnouncementCard key={item.slug} item={item}/>:<ContentCard key={item.slug} item={item} kind={kind}/>)}</div>:<div className="empty"><h2>Aucun résultat</h2><p className="mt-3 text-muted-foreground">Essayez un autre mot ou une autre catégorie.</p><Button variant="outline" className="mt-5" onClick={()=>{setQuery('');setCategory('');setLocation('');setPage(1);}}>Réinitialiser les filtres</Button></div>}<Pagination page={page} setPage={setPage} total={Math.ceil(filtered.length/pageSize)}/>{source==='demo'&&(kind==='actualites'||kind==='annonces'||kind==='agenda'||kind==='projets')&&<p className="meta mt-8">Informations et dates indicatives : cette version de présentation ne constitue pas une publication officielle.</p>}{kind==='artistes'&&<div className="info-band"><h3>Un annuaire construit avec les acteurs du territoire</h3><p>Ces fiches thématiques précèdent la publication de profils individuels vérifiés. Vous souhaitez présenter votre activité ?</p><Link to="/contact" className="section-link">Contactez la Direction<ArrowRight size={14}/></Link></div>}</div></section><ContactBand/></>;
+/* eslint-disable no-empty */
+import { Link, useNavigate } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
+import {
+  Search,
+  ArrowRight,
+  ArrowLeft,
+  MapPin,
+  CalendarDays,
+  Clock,
+  Download,
+  Share2,
+  X,
+  Play,
+  Pause,
+  Check,
+  Landmark,
+  Palette,
+  Users,
+  BookOpen,
+  Globe,
+  Mail,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  content,
+  images,
+  pageInfo,
+  pagePaths,
+  type ContentKind,
+  type ContentItem,
+} from "@/lib/portal/content";
+import { PageBanner, ContactBand } from "./chrome";
+import type { ContentSource } from "@/lib/portal/source";
+import {
+  ContentCard,
+  AnnouncementCard,
+  HeritageCards,
+  PartnerGrid,
+  SectionHeading,
+  ItemLink,
+} from "./cards";
+const kinds = Object.keys(content) as ContentKind[];
+const searchable = kinds.flatMap((kind) => content[kind].map((item) => ({ item, kind })));
+const normalize = (s: string) =>
+  s
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+function Pagination({
+  page,
+  setPage,
+  total,
+}: {
+  page: number;
+  setPage: (v: number) => void;
+  total: number;
+}) {
+  return total > 1 ? (
+    <nav className="pagination" aria-label="Pagination">
+      <Button
+        variant="outline"
+        size="icon"
+        disabled={page === 1}
+        aria-label="Page précédente"
+        onClick={() => setPage(page - 1)}
+      >
+        <ArrowLeft />
+      </Button>
+      {Array.from({ length: total }, (_, i) => (
+        <Button
+          key={i}
+          variant={page === i + 1 ? "default" : "outline"}
+          aria-current={page === i + 1 ? "page" : undefined}
+          onClick={() => setPage(i + 1)}
+        >
+          {i + 1}
+        </Button>
+      ))}
+      <Button
+        variant="outline"
+        size="icon"
+        disabled={page === total}
+        aria-label="Page suivante"
+        onClick={() => setPage(page + 1)}
+      >
+        <ArrowRight />
+      </Button>
+    </nav>
+  ) : null;
 }
-function GalleryViewer() { const slides=[{src:images.artisan,label:'Gestes de tissage — illustration'},{src:images.dance,label:'Danses et expressions collectives — illustration'},{src:images.heritage,label:'Paysages des Plateaux — illustration'},{src:images.exhibition,label:'Rencontre autour des arts visuels — illustration'}]; const [index,setIndex]=useState<number|null>(null);
- useEffect(()=>{if(index===null)return;const key=(e:KeyboardEvent)=>{if(e.key==='Escape')setIndex(null);if(e.key==='ArrowRight')setIndex(v=>v===null?null:(v+1)%slides.length);if(e.key==='ArrowLeft')setIndex(v=>v===null?null:(v+slides.length-1)%slides.length);};document.addEventListener('keydown',key);return()=>document.removeEventListener('keydown',key);},[index]);
- return <><div className="gallery">{slides.map((slide,i)=><figure key={slide.src}><Button variant="ghost" className="w-full h-auto p-0" onClick={()=>setIndex(i)} aria-label={`Agrandir : ${slide.label}`}><img src={slide.src} alt={slide.label} width={1200} height={800} loading="lazy"/></Button><figcaption>{slide.label}</figcaption></figure>)}</div>{index!==null&&<div className="lightbox" role="dialog" aria-modal="true" aria-label="Visionneuse photo"><Button variant="heroOutline" size="icon" className="absolute top-5 right-5" autoFocus onClick={()=>setIndex(null)} aria-label="Fermer la galerie"><X/></Button><img src={slides[index]?.src} alt={slides[index]?.label}/><div className="lightbox-controls"><Button variant="heroOutline" size="icon" onClick={()=>setIndex((index+slides.length-1)%slides.length)} aria-label="Photo précédente"><ArrowLeft/></Button><span>{index+1} / {slides.length} · {slides[index]?.label}</span><Button variant="heroOutline" size="icon" onClick={()=>setIndex((index+1)%slides.length)} aria-label="Photo suivante"><ArrowRight/></Button></div></div>}</>;
+export function ArchivePage({
+  kind,
+  items = content[kind],
+  source = "demo",
+}: {
+  kind: ContentKind;
+  items?: ContentItem[];
+  source?: ContentSource;
+}) {
+  const [query, setQuery] = useState("");
+  const [category, setCategory] = useState("");
+  const [location, setLocation] = useState("");
+  const [page, setPage] = useState(1);
+  const info = pageInfo[kind];
+  const filtered = items.filter(
+    (item) =>
+      normalize(item.title + " " + item.summary).includes(normalize(query)) &&
+      (!category || item.category === category) &&
+      (!location || item.location === location),
+  );
+  const pageSize = kind === "actualites" ? 3 : 6;
+  return (
+    <>
+      <PageBanner {...info} />
+      <section className="section">
+        <div className="wrap">
+          <div className="filters">
+            <label className="search-field">
+              <Search />
+              <input
+                aria-label={`Rechercher : ${info.title}`}
+                placeholder="Rechercher dans cette rubrique…"
+                value={query}
+                onChange={(e) => {
+                  setQuery(e.target.value);
+                  setPage(1);
+                }}
+              />
+            </label>
+            <select
+              aria-label="Filtrer par catégorie"
+              value={category}
+              onChange={(e) => {
+                setCategory(e.target.value);
+                setPage(1);
+              }}
+            >
+              <option value="">Toutes les catégories</option>
+              {[...new Set(items.map((i) => i.category))].map((c) => (
+                <option key={c}>{c}</option>
+              ))}
+            </select>
+            {(kind === "agenda" || kind === "artistes") && (
+              <select
+                aria-label="Filtrer par localité"
+                value={location}
+                onChange={(e) => {
+                  setLocation(e.target.value);
+                  setPage(1);
+                }}
+              >
+                <option value="">Toutes les localités</option>
+                {[...new Set(items.map((i) => i.location).filter(Boolean))].map((c) => (
+                  <option key={c}>{c}</option>
+                ))}
+              </select>
+            )}
+          </div>
+          <p className="meta mb-5" aria-live="polite">
+            {filtered.length} {filtered.length > 1 ? "résultats" : "résultat"}
+          </p>
+          {filtered.length ? (
+            <div className="grid-3">
+              {filtered
+                .slice((page - 1) * pageSize, page * pageSize)
+                .map((item) =>
+                  kind === "annonces" ? (
+                    <AnnouncementCard key={item.slug} item={item} />
+                  ) : (
+                    <ContentCard key={item.slug} item={item} kind={kind} />
+                  ),
+                )}
+            </div>
+          ) : (
+            <div className="empty">
+              <h2>Aucun résultat</h2>
+              <p className="mt-3 text-muted-foreground">
+                Essayez un autre mot ou une autre catégorie.
+              </p>
+              <Button
+                variant="outline"
+                className="mt-5"
+                onClick={() => {
+                  setQuery("");
+                  setCategory("");
+                  setLocation("");
+                  setPage(1);
+                }}
+              >
+                Réinitialiser les filtres
+              </Button>
+            </div>
+          )}
+          <Pagination page={page} setPage={setPage} total={Math.ceil(filtered.length / pageSize)} />
+          {source === "demo" &&
+            (kind === "actualites" ||
+              kind === "annonces" ||
+              kind === "agenda" ||
+              kind === "projets") && (
+              <p className="meta mt-8">
+                Informations et dates indicatives : cette version de présentation ne constitue pas
+                une publication officielle.
+              </p>
+            )}
+          {kind === "artistes" && (
+            <div className="info-band">
+              <h3>Un annuaire construit avec les acteurs du territoire</h3>
+              <p>
+                Ces fiches thématiques précèdent la publication de profils individuels vérifiés.
+                Vous souhaitez présenter votre activité ?
+              </p>
+              <Link to="/contact" className="section-link">
+                Contactez la Direction
+                <ArrowRight size={14} />
+              </Link>
+            </div>
+          )}
+        </div>
+      </section>
+      <ContactBand />
+    </>
+  );
 }
+<<<<<<< Updated upstream
 function VisualStory() { const [playing,setPlaying]=useState(false); const [step,setStep]=useState(0);const slides=[images.dance,images.artisan,images.heritage,images.exhibition];useEffect(()=>{if(!playing)return;const timer=setInterval(()=>setStep(s=>{if(s===3){setPlaying(false);return 0;}return s+1;}),4000);return()=>clearInterval(timer);},[playing]);return <div><div className="relative"><img src={slides[step]} className="detail-image mb-0" alt={['Expressions culturelles','Savoir-faire artisanaux','Paysages des Plateaux','Création contemporaine'][step]} width={1200} height={800}/><Button variant="hero" size="icon" className="absolute bottom-5 left-5" onClick={()=>setPlaying(!playing)} aria-label={playing?'Mettre le récit en pause':'Lire le récit visuel'}>{playing?<Pause/>:<Play/>}</Button></div><div className="flex justify-between text-xs text-muted-foreground mt-3"><span>Récit visuel · Illustrations des Plateaux</span><span aria-live="polite">{String(step*4).padStart(2,'0')} / 16 secondes</span></div></div>; }
 export function DetailPage({kind,slug, items = content[kind], source = 'demo'}:{kind:ContentKind; slug:string; items?:ContentItem[]; source?:ContentSource}) {
  const item=items.find(i=>i.slug===slug); const [shared,setShared]=useState(false);
@@ -30,25 +234,1195 @@ export function DetailPage({kind,slug, items = content[kind], source = 'demo'}:{
  {item.documents&&item.documents.length>0&&<><h2>Documents à télécharger</h2><ul className="document-list">{item.documents.map((doc,i)=><li key={i}><Download size={15}/><a href={doc.url} target="_blank" rel="noreferrer noopener" download>{doc.name}</a></li>)}</ul></>}{kind==='annonces'&&<div className="info-band"><h3>Document et renseignements</h3><p>Consultez la version texte de cette annonce. Les pièces officielles seront ajoutées après validation.</p><Button variant="outline" onClick={download}><Download/>Télécharger le texte</Button><p>Pour toute précision : <Link to="/contact" className="underline">contacter la Direction</Link>.</p></div>}
  {kind==='galeries'&&<GalleryViewer/>}{kind==='agenda'&&item.location&&<><h2>Le rendez-vous sur le territoire</h2><div className="map-panel"><div><MapPin className="mx-auto mb-3"/><p>{item.location}, région des Plateaux</p><a className="section-link" target="_blank" rel="noreferrer" href={`https://www.openstreetmap.org/search?query=${encodeURIComponent(item.location+' Togo')}`}>Voir la localité sur OpenStreetMap<ArrowRight size={14}/></a></div></div></>}
  <div className="quick-links"><Button variant="outline" onClick={share}>{shared?<Check/>:<Share2/>}{shared?'Lien copié':'Partager'}</Button><Button variant="outline" asChild><Link to={`/${kind}`}>Retour à la rubrique<ArrowLeft/></Link></Button></div></div>{items.length>1&&<div className="mt-14"><SectionHeading eyebrow="Poursuivre la découverte" title={kind==='agenda'?'D’autres rendez-vous':'À découvrir également'}/><div className="grid-3">{items.filter(i=>i.slug!==slug).slice(0,3).map(i=><ContentCard key={i.slug} item={i} kind={kind}/>)}</div></div>}</div></section></>;
+=======
+function GalleryViewer() {
+  const slides = [
+    { src: images.artisan, label: "Gestes de tissage — illustration" },
+    { src: images.dance, label: "Danses et expressions collectives — illustration" },
+    { src: images.heritage, label: "Paysages des Plateaux — illustration" },
+    { src: images.exhibition, label: "Rencontre autour des arts visuels — illustration" },
+  ];
+  const [index, setIndex] = useState<number | null>(null);
+  useEffect(() => {
+    if (index === null) return;
+    const key = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setIndex(null);
+      if (e.key === "ArrowRight") setIndex((v) => (v === null ? null : (v + 1) % slides.length));
+      if (e.key === "ArrowLeft")
+        setIndex((v) => (v === null ? null : (v + slides.length - 1) % slides.length));
+    };
+    document.addEventListener("keydown", key);
+    return () => document.removeEventListener("keydown", key);
+  }, [index]);
+  return (
+    <>
+      <div className="gallery">
+        {slides.map((slide, i) => (
+          <figure key={slide.src}>
+            <Button
+              variant="ghost"
+              className="w-full h-auto p-0"
+              onClick={() => setIndex(i)}
+              aria-label={`Agrandir : ${slide.label}`}
+            >
+              <img src={slide.src} alt={slide.label} width={1200} height={800} loading="lazy" />
+            </Button>
+            <figcaption>{slide.label}</figcaption>
+          </figure>
+        ))}
+      </div>
+      {index !== null && (
+        <div className="lightbox" role="dialog" aria-modal="true" aria-label="Visionneuse photo">
+          <Button
+            variant="heroOutline"
+            size="icon"
+            className="absolute top-5 right-5"
+            autoFocus
+            onClick={() => setIndex(null)}
+            aria-label="Fermer la galerie"
+          >
+            <X />
+          </Button>
+          <img src={slides[index]?.src} alt={slides[index]?.label} />
+          <div className="lightbox-controls">
+            <Button
+              variant="heroOutline"
+              size="icon"
+              onClick={() => setIndex((index + slides.length - 1) % slides.length)}
+              aria-label="Photo précédente"
+            >
+              <ArrowLeft />
+            </Button>
+            <span>
+              {index + 1} / {slides.length} · {slides[index]?.label}
+            </span>
+            <Button
+              variant="heroOutline"
+              size="icon"
+              onClick={() => setIndex((index + 1) % slides.length)}
+              aria-label="Photo suivante"
+            >
+              <ArrowRight />
+            </Button>
+          </div>
+        </div>
+      )}
+    </>
+  );
 }
-const faqGroups=[{title:'La Direction et ses missions',items:[['Quel est le rôle de la Direction régionale ?','Elle contribue à la promotion des arts et de la culture, à la valorisation du patrimoine et à l’accompagnement des acteurs du territoire. Les attributions administratives détaillées doivent être confirmées par les textes en vigueur.'],['Quel territoire est concerné ?','Le portail est consacré à la région des Plateaux au Togo, notamment aux dynamiques culturelles d’Atakpamé, de Kpalimé, de Notsé et des autres localités.']]},{title:'Projets et participation',items:[['Comment proposer un projet culturel ?','Préparez une présentation avec les objectifs, le public, le calendrier et le budget envisagé. Contactez ensuite la Direction pour connaître les modalités officielles de dépôt.'],['Les appels à projets affichés sont-ils ouverts ?','Non. Les annonces de cette version sont des exemples éditoriaux. Aucun dispositif réel ni financement n’est ouvert sur ce portail de présentation.'],['Comment faire référencer une activité artistique ?','Le référencement de profils nécessite des informations vérifiées et le consentement de l’artiste. Les modalités seront précisées avant l’ouverture d’un annuaire officiel.']]},{title:'Agenda et ressources',items:[['Comment connaître les conditions d’un événement ?','La fiche de chaque rendez-vous présente les informations pratiques. Les dates de cette version sont indicatives et devront être validées par l’organisateur.'],['Puis-je réutiliser les images du site ?','Les visuels de présentation sont générés. Avant toute réutilisation dans un contexte officiel, vérifiez les droits applicables et privilégiez des photographies documentaires autorisées.']]}];
-export function SearchPage({q=''}:{q?:string}) {const [input,setInput]=useState(q);const [page,setPage]=useState(1);const navigate=useNavigate();useEffect(()=>{setInput(q);setPage(1);},[q]);const results=q?searchable.filter(({item})=>normalize(item.title+' '+item.summary+' '+item.category).includes(normalize(q))):[];return <><PageBanner {...pageInfo.recherche}/><section className="section"><div className="wrap"><form className="filters" onSubmit={e=>{e.preventDefault();navigate({to:'/recherche',search:{q:input}});}}><label className="search-field"><Search/><input aria-label="Rechercher sur le portail" value={input} onChange={e=>setInput(e.target.value)} placeholder="Un thème, une localité, une actualité…"/></label><Button type="submit">Rechercher<ArrowRight/></Button></form>{q?<><p className="mb-6 text-muted-foreground" aria-live="polite">{results.length} résultat{results.length>1?'s':''} pour « {q} »</p>{results.length?<div className="grid-3">{results.slice((page-1)*6,page*6).map(({kind,item})=><ContentCard key={kind+item.slug} kind={kind} item={item}/>)}</div>:<div className="empty"><h2>Aucun résultat pour cette recherche</h2><p className="mt-3">Essayez un terme plus général, comme « patrimoine » ou « Kpalimé ».</p></div>}<Pagination page={page} setPage={setPage} total={Math.ceil(results.length/6)}/></>:<div className="empty"><h2>Que souhaitez-vous découvrir ?</h2><p className="mt-3">Explorez les actualités, les patrimoines et les rendez-vous des Plateaux.</p></div>}</div></section></>; }
-function ContactForm() { const [prepared,setPrepared]=useState(false);const [message,setMessage]=useState(''); return <form onSubmit={e=>{e.preventDefault();setPrepared(true);}}><div className="form-grid"><label>Nom et prénom *<input required name="name" autoComplete="name" placeholder="Votre nom"/></label><label>Adresse e-mail *<input required type="email" name="email" autoComplete="email" placeholder="vous@exemple.com"/></label><label className="form-wide">Objet *<select aria-label="Objet" required name="subject"><option value="">Sélectionner un objet</option><option>Projet culturel</option><option>Patrimoine et documentation</option><option>Information institutionnelle</option><option>Autre demande</option></select></label><label className="form-wide">Votre message *<textarea required rows={6} name="message" value={message} onChange={e=>setMessage(e.target.value)} placeholder="Présentez votre demande…"/></label></div><label className="flex items-start gap-3 text-xs mt-5"><input type="checkbox" required className="mt-1"/> <span>J’ai lu la <Link to="/confidentialite" className="underline">politique de confidentialité</Link> et j’accepte l’utilisation de mes informations pour traiter ma demande.</span></label><p className="meta mt-4">Le formulaire de présentation n’envoie aucun message.</p><Button type="submit" className="mt-5">Préparer ma demande<ArrowRight/></Button>{prepared&&<div role="status" className="info-band"><h3>Votre demande est prête, mais n’a pas été envoyée.</h3><p>L’adresse officielle doit être confirmée avant de pouvoir contacter la Direction.</p><Button variant="outline" onClick={async()=>{try{await navigator.clipboard.writeText(message);}catch{}}}>Copier mon message</Button></div>}</form>; }
-export function StaticPage({slug, galeries, videos}:{slug:keyof typeof pageInfo; galeries?:ContentItem[]; videos?:ContentItem[]}) {const info=pageInfo[slug];if(!info)return <MissingPage/>;return <><PageBanner {...info}/><section className="section"><div className="wrap">
-{slug==='la-direction'&&<><div className="institution-row"><div><div className="eyebrow text-gold-foreground">Au service du territoire</div><h2>Accompagner les cultures,<br/>relier les générations</h2><p>La Direction régionale des arts et de la culture des Plateaux est présentée ici comme un espace de dialogue entre institutions, créateurs, communautés et publics.</p><p className="mt-4">Son action s’inscrit dans une volonté de valoriser les expressions culturelles locales et d’encourager l’accès à la création, dans le respect de la diversité.</p><div className="quick-links"><Button variant="outline" asChild><Link to="/missions">Nos missions<ArrowRight/></Link></Button><Button variant="outline" asChild><Link to="/organisation">Notre organisation<ArrowRight/></Link></Button></div></div><img src={images.exhibition} alt="Illustration de rencontre culturelle" loading="lazy" width={1200} height={800}/></div><div className="prose"><h2>Un territoire de mémoire et de création</h2><p>Les Plateaux rassemblent des lieux historiques, des traditions vivantes et des savoir-faire reconnus. Atakpamé, Notsé et Kpalimé témoignent de cette diversité, à laquelle contribuent toutes les localités de la région.</p><h2>Nos valeurs</h2><ul><li>Le respect de la diversité culturelle et des droits des communautés.</li><li>La transmission entre générations et l’ouverture aux jeunes publics.</li><li>La coopération avec les acteurs du territoire.</li><li>L’accessibilité et la qualité de l’information publique.</li></ul><h2>Une vision partagée</h2><p>Faire de la culture une ressource vivante : une mémoire qui éclaire le présent, une création qui ouvre des perspectives et un lien qui rassemble les habitants.</p><div className="info-band"><h3>Le mot de la Direction</h3><p>« Notre région possède une richesse culturelle qui mérite d’être connue et transmise. En réunissant les initiatives, nous souhaitons ouvrir de nouveaux espaces de rencontre et de partage. »</p><p className="meta">Message de présentation proposé, à valider par la Direction.</p></div></div></>}
-{slug==='missions'&&<><SectionHeading eyebrow="Notre engagement" title="Quatre axes pour agir"/><div className="grid-2">{([[Palette,'Soutenir la création','Favoriser la rencontre des artistes, la circulation des œuvres et la reconnaissance des pratiques contemporaines.'],[Landmark,'Valoriser le patrimoine','Contribuer à la connaissance des sites, des récits et des savoir-faire, en associant les communautés concernées.'],[Users,'Accompagner les acteurs','Orienter les associations, les artisans et les structures dans la préparation de leurs initiatives culturelles.'],[BookOpen,'Transmettre et sensibiliser','Encourager la médiation, l’éducation artistique et le dialogue entre les générations.']] as const).map(([Icon,title,text])=><div className="announcement" key={String(title)}>{Icon&&<Icon size={26} className="text-gold-foreground"/>}<h3>{String(title)}</h3><p>{String(text)}</p></div>)}</div><div className="prose"><h2>Un accompagnement de proximité</h2><p>L’orientation, la mise en relation et le partage d’informations permettent aux porteurs de projets de mieux identifier les ressources disponibles. Les services et compétences réglementaires seront précisés après validation institutionnelle.</p></div></>}
-{slug==='organisation'&&<><div className="prose"><h2>Une coordination régionale</h2><p>L’organisation présentée est une proposition fonctionnelle. L’organigramme officiel et les noms des responsables doivent être confirmés par la Direction.</p><div className="info-band"><h3>Direction régionale</h3><p>Coordination des activités, dialogue institutionnel et suivi des orientations culturelles.</p></div></div><div className="grid-3">{[['Patrimoine et documentation','Connaissance des patrimoines, ressources et médiation.'],['Arts et vie culturelle','Accompagnement des créateurs et des initiatives locales.'],['Administration et accueil','Information du public et suivi administratif.']].map(([t,p])=><div className="announcement" key={t}><h3>{t}</h3><p>{p}</p><span className="meta">Responsable : à confirmer</span></div>)}</div></>}
-{slug==='patrimoine'&&<><SectionHeading eyebrow="Explorer nos héritages" title="Des cultures vivantes"/><HeritageCards/><div className="prose"><h2>Une mémoire plurielle</h2><p>La région des Plateaux est un territoire de diversité. Les fêtes de récolte, les expressions musicales, l’artisanat et les sites historiques y occupent une place importante dans la vie des communautés.</p><p>La valorisation de ces héritages exige une démarche attentive aux contextes et aux droits de celles et ceux qui les portent.</p></div></>}
-{slug==='arts-traditionnels'&&<><div className="institution-row"><img src={images.dance} alt="Illustration de danses et percussions" width={1200} height={800} loading="lazy"/><div><h2>Des expressions qui rassemblent</h2><p>Danses, percussions, chants et savoir-faire artisanaux accompagnent la vie des communautés. Ils transmettent des récits, des gestes et des manières de créer ensemble.</p><p className="mt-4">À Kpalimé, le batik, le tissage et la sculpture témoignent de la richesse de la création artisanale.</p></div></div><div className="prose"><h2>Fêtes et transmission</h2><p>Agbogbo-Zan à Notsé, Odon-Itchu à Atakpamé et Dzawuza dans le Kloto sont des expressions importantes de la mémoire et de la vie collective. Leurs calendriers et leurs rites doivent être présentés avec les communautés organisatrices.</p><h2>Respecter les savoirs</h2><p>La documentation et la diffusion des pratiques doivent prendre en compte le consentement, les usages et les éventuelles restrictions de partage.</p></div><SectionHeading eyebrow="Pour aller plus loin" title="Les savoir-faire à découvrir"/><div className="grid-3">{content.artistes.map(i=><ContentCard kind="artistes" item={i} key={i.slug}/>)}</div></>}
-{slug==='patrimoine-culturel'&&<><img src={images.heritage} alt="Illustration du patrimoine paysager des Plateaux" className="detail-image" width={1200} height={800} loading="lazy"/><div className="prose"><h2>Le patrimoine matériel</h2><p>À Notsé, les vestiges de l’Agbogbo rappellent une histoire majeure des communautés éwé. Près d’Atakpamé, le site de Kamina témoigne de l’histoire des communications et de la période coloniale.</p><h2>Le patrimoine immatériel</h2><p>Les récits, les fêtes, les expressions musicales et les savoir-faire constituent un patrimoine vivant. Sa sauvegarde repose sur la participation des détenteurs de connaissances.</p><h2>Des paysages liés à la mémoire</h2><p>Le mont Agou, point culminant du Togo, et les cascades de la région de Badou participent à la singularité des Plateaux. Leur découverte doit respecter les populations et les milieux naturels.</p><h2>Préserver ensemble</h2><p>Documenter, sensibiliser et transmettre sont des démarches complémentaires. La conservation ne saurait être dissociée de la vie des communautés et de leurs attentes.</p></div></>}
-{slug==='mediatheque'&&<><div className="quick-links"><Button variant="outline" asChild><Link to="/galeries">Galeries photo<ArrowRight/></Link></Button><Button variant="outline" asChild><Link to="/videos">Vidéos<Play/></Link></Button><Button variant="outline" asChild><Link to="/recherche" search={{q:'patrimoine'}}>Récits et reportages<Search/></Link></Button></div><SectionHeading eyebrow="Galeries" title="Les Plateaux en images" path="/galeries" label="Toutes les galeries"/><div className="grid-3">{(galeries??content.galeries).map(i=><ContentCard kind="galeries" item={i} key={i.slug}/>)}</div><div className="mt-12"><SectionHeading eyebrow="Récits visuels" title="Des regards à partager" path="/videos" label="Toutes les vidéos"/><div className="grid-3">{(videos??content.videos).map(i=><ContentCard kind="videos" item={i} key={i.slug}/>)}</div></div></>}
-{slug==='partenaires'&&<><PartnerGrid/><div className="prose"><p>Cette page présente des catégories de coopération et des institutions de référence. Elle ne revendique aucun partenariat formalisé sans confirmation.</p><h2>Institutions publiques</h2><p>Le dialogue avec les services de l’État et les collectivités territoriales permet de relier les priorités culturelles aux besoins locaux.</p><h2>Coopération culturelle</h2><p>Les organisations engagées dans la culture, dont l’UNESCO, constituent des références pour la sauvegarde du patrimoine et la diversité des expressions culturelles. Les accords effectifs seront précisés ici après validation.</p><h2>Associations et acteurs locaux</h2><p>Artisans, artistes, associations et structures éducatives jouent un rôle essentiel dans la préparation et la mise en œuvre des initiatives.</p><Button variant="outline" asChild className="mt-5"><Link to="/contact">Construire une coopération<ArrowRight/></Link></Button></div></>}
-{slug==='contact'&&<div className="grid-2"><div><h2 className="text-2xl text-primary mb-5">Parlons de votre initiative</h2><ContactForm/></div><div><div className="info-band mt-0"><h3>Direction régionale des arts et de la culture</h3><p className="flex items-center gap-2"><MapPin size={16}/>Région des Plateaux, Togo</p><p>Adresse : en attente de confirmation officielle.</p><p>Téléphone : à confirmer.</p><p>E-mail : à confirmer.</p><p>Horaires d’accueil : à confirmer.</p></div><div className="map-panel"><div><MapPin className="mx-auto mb-4"/><h3 className="font-serif text-xl text-primary">Région des Plateaux</h3><p className="text-sm text-muted-foreground my-3">La localisation précise des bureaux sera ajoutée après confirmation.</p><a href="https://www.openstreetmap.org/search?query=Atakpame%20Togo" target="_blank" rel="noreferrer" className="section-link">Découvrir Atakpamé sur la carte<ArrowRight size={14}/></a></div></div><p className="meta mt-5">Les comptes sociaux officiels seront ajoutés après validation.</p></div></div>}
-{slug==='faq'&&<div className="prose">{faqGroups.map(g=><div key={g.title}><h2>{g.title}</h2>{g.items.map(([q,a])=><details className="faq-item" key={q}><summary>{q}</summary><p>{a}</p></details>)}</div>)}</div>}
-{slug==='archives'&&<ArchiveExplorer/>}
-{slug==='mentions-legales'&&<div className="prose"><h2>Édition du portail</h2><p>Portail de présentation de la Direction régionale des arts et de la culture des Plateaux, Togo. L’identité de l’éditeur légal, l’adresse administrative et le responsable de publication doivent être confirmés avant une mise en ligne officielle.</p><h2>Statut des contenus</h2><p>Les événements, annonces, programmes et messages institutionnels sont des exemples éditoriaux. Ils ne valent ni communiqué officiel, ni engagement de financement. Les visuels sont des illustrations générées.</p><h2>Propriété intellectuelle</h2><p>Les contenus documentaires et photographiques définitifs devront faire l’objet d’une vérification des droits de publication. La citation des communautés et des créateurs doit respecter leurs droits.</p><h2>Hébergement et responsabilité</h2><p>Les coordonnées de l’hébergeur seront ajoutées après choix du mode d’exploitation. L’éditeur prendra les mesures nécessaires pour maintenir les informations à jour et corriger les erreurs signalées.</p><h2>Liens externes</h2><p>Les sites tiers sont responsables de leurs propres contenus. Les liens proposés ne constituent pas une approbation de toutes leurs publications.</p><h2>Contact</h2><p>Pour signaler une erreur, les coordonnées officielles seront disponibles sur la <Link to="/contact" className="underline">page Contact</Link> après validation.</p></div>}
-{slug==='confidentialite'&&<div className="prose"><h2>Un principe de transparence</h2><p>Cette version de présentation ne crée aucun compte utilisateur et ne transmet pas les messages du formulaire de contact. Les textes saisis restent dans la page jusqu’à sa fermeture.</p><h2>Données de contact</h2><p>Si un service d’envoi est activé, les nom, adresse e-mail, objet et message seront utilisés uniquement pour répondre à la demande. Le responsable, la base légale et la durée de conservation devront être précisés avant activation.</p><h2>Cookies et services externes</h2><p>Aucun outil de mesure d’audience n’a été ajouté au portail. Les polices peuvent être chargées depuis un service externe. Les liens vers les plateformes sociales et cartographiques ouvrent leurs propres sites, soumis à leurs politiques.</p><h2>Vos droits</h2><p>La politique définitive précisera les modalités d’accès, de rectification et de suppression, ainsi que les voies de recours prévues par le droit applicable au Togo.</p><h2>Sécurité et conservation</h2><p>Le portail officiel devra limiter les accès, protéger les échanges et définir une durée de conservation proportionnée aux demandes traitées.</p><h2>Mise à jour</h2><p>Ce texte est une base de travail et doit être validé par le responsable de traitement avant la collecte effective de données.</p></div>}
-{slug==='plan-du-site'&&<div className="grid-3">{(Object.keys(pageInfo) as Array<keyof typeof pageInfo>).filter(s=>s!=='plan-du-site').map(s=><div key={s} className="border-b border-border py-4"><Link to={pagePaths[s]} className="section-link">{pageInfo[s].title}<ArrowRight size={14}/></Link>{s in content&&<ul className="mt-3">{content[s as ContentKind].map(item=><li className="text-xs text-muted-foreground my-2" key={item.slug}><ItemLink kind={s as ContentKind} item={item}>{item.title}</ItemLink></li>)}</ul>}</div>)}</div>}
-</div></section>{!['contact','mentions-legales','confidentialite','plan-du-site','archives'].includes(slug)&&<ContactBand/>}</>; }
-function ArchiveExplorer() {const [year,setYear]=useState('2026');const [theme,setTheme]=useState('');const [kind,setKind]=useState('');const [page,setPage]=useState(1);const results=searchable.filter(r=>(!year||r.item.date.includes(year))&&(!theme||r.item.category===theme)&&(!kind||r.kind===kind));return <><div className="filters"><select aria-label="Année" value={year} onChange={e=>{setYear(e.target.value);setPage(1);}}><option value="">Toutes les années</option><option>2026</option><option>2027</option><option>2028</option></select><select aria-label="Thème culturel" value={theme} onChange={e=>{setTheme(e.target.value);setPage(1);}}><option value="">Tous les thèmes</option>{[...new Set(searchable.map(r=>r.item.category))].map(c=><option key={c}>{c}</option>)}</select><select aria-label="Type de contenu" value={kind} onChange={e=>{setKind(e.target.value);setPage(1);}}><option value="">Tous les contenus</option>{kinds.map(k=><option key={k} value={k}>{pageInfo[k].title}</option>)}</select></div><p className="meta mb-5">{results.length} publication{results.length>1?'s':''}</p>{results.length?<div className="grid-3">{results.slice((page-1)*6,page*6).map(r=><ContentCard key={r.kind+r.item.slug} {...r}/>)}</div>:<div className="empty">Aucune publication pour ces critères.</div>}<Pagination page={page} setPage={setPage} total={Math.ceil(results.length/6)}/></>; }
-export function MissingPage() {const navigate=useNavigate();const [q,setQ]=useState('');return <><PageBanner title="Page introuvable" intro="Cette page a peut-être été déplacée, ou l’adresse n’est pas correcte."/><section className="section"><div className="wrap prose text-center"><div className="font-serif text-7xl text-gold-foreground">404</div><h2>Retrouvons votre chemin</h2><p>Explorez les rubriques du portail ou lancez une recherche.</p><form className="filters" onSubmit={e=>{e.preventDefault();navigate({to:'/recherche',search:{q}});}}><input aria-label="Rechercher une page" value={q} onChange={e=>setQ(e.target.value)} placeholder="Votre recherche" className="flex-1"/><Button type="submit"><Search/>Rechercher</Button></form><div className="quick-links justify-center"><Button asChild><Link to="/">Retour à l’accueil</Link></Button><Button variant="outline" asChild><Link to="/agenda">Agenda culturel</Link></Button><Button variant="outline" asChild><Link to="/plan-du-site">Plan du site</Link></Button></div></div></section></>; }
+function VisualStory() {
+  const [playing, setPlaying] = useState(false);
+  const [step, setStep] = useState(0);
+  const slides = [images.dance, images.artisan, images.heritage, images.exhibition];
+  useEffect(() => {
+    if (!playing) return;
+    const timer = setInterval(
+      () =>
+        setStep((s) => {
+          if (s === 3) {
+            setPlaying(false);
+            return 0;
+          }
+          return s + 1;
+        }),
+      4000,
+    );
+    return () => clearInterval(timer);
+  }, [playing]);
+  return (
+    <div>
+      <div className="relative">
+        <img
+          src={slides[step]}
+          className="detail-image mb-0"
+          alt={
+            [
+              "Expressions culturelles",
+              "Savoir-faire artisanaux",
+              "Paysages des Plateaux",
+              "Création contemporaine",
+            ][step]
+          }
+          width={1200}
+          height={800}
+        />
+        <Button
+          variant="hero"
+          size="icon"
+          className="absolute bottom-5 left-5"
+          onClick={() => setPlaying(!playing)}
+          aria-label={playing ? "Mettre le récit en pause" : "Lire le récit visuel"}
+        >
+          {playing ? <Pause /> : <Play />}
+        </Button>
+      </div>
+      <div className="flex justify-between text-xs text-muted-foreground mt-3">
+        <span>Récit visuel · Illustrations des Plateaux</span>
+        <span aria-live="polite">{String(step * 4).padStart(2, "0")} / 16 secondes</span>
+      </div>
+    </div>
+  );
+}
+export function DetailPage({
+  kind,
+  slug,
+  items = content[kind],
+  source = "demo",
+}: {
+  kind: ContentKind;
+  slug: string;
+  items?: ContentItem[];
+  source?: ContentSource;
+}) {
+  const item = items.find((i) => i.slug === slug);
+  const [shared, setShared] = useState(false);
+  if (!item) return <MissingPage />;
+  const share = async () => {
+    try {
+      if (navigator.share) await navigator.share({ title: item.title, url: window.location.href });
+      else {
+        await navigator.clipboard.writeText(window.location.href);
+        setShared(true);
+      }
+    } catch {
+      setShared(false);
+    }
+  };
+  const download = () => {
+    const blob = new Blob(
+      [
+        `${item.title}\n${item.date}\n\n${item.body.join("\n\n")}\n\nDocument de présentation — non officiel.`,
+      ],
+      { type: "text/plain;charset=utf-8" },
+    );
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${item.slug}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+  return (
+    <>
+      <PageBanner
+        title={item.title}
+        intro={item.summary}
+        parent={{ label: pageInfo[kind].title, path: kind }}
+      />
+      <section className="section">
+        <div className="wrap">
+          <div className="prose">
+            <div className="meta mb-6">
+              <span className="tag">{item.category}</span>
+              <CalendarDays size={13} />
+              {item.date}
+              {item.status && <span>{item.status}</span>}
+            </div>
+            {kind === "videos" ? (
+              <VisualStory />
+            ) : (
+              <img
+                src={item.image}
+                alt={item.title}
+                className="detail-image"
+                width={1200}
+                height={800}
+              />
+            )}{" "}
+            {kind === "agenda" && (
+              <div className="info-band">
+                <h2 className="mt-0">Informations pratiques</h2>
+                <p className="flex items-center gap-2">
+                  <CalendarDays size={17} />
+                  {item.date}
+                </p>
+                {item.time && (
+                  <p className="flex items-center gap-2">
+                    <Clock size={17} />
+                    {item.time}
+                  </p>
+                )}
+                {item.location && (
+                  <p className="flex items-center gap-2">
+                    <MapPin size={17} />
+                    {item.location}
+                    {source === "demo" ? " — lieu précis à confirmer" : ""}
+                  </p>
+                )}
+                {source === "demo" && (
+                  <>
+                    <p>
+                      Organisateur envisagé : acteurs culturels du territoire, en lien avec la
+                      Direction.
+                    </p>
+                    <p>Public : tout public. Conditions d’accès à confirmer.</p>
+                  </>
+                )}
+              </div>
+            )}
+            {source === "demo" && (kind === "actualites" || kind === "agenda") && (
+              <p className="meta">
+                Informations et dates indicatives : cette version de présentation ne constitue pas
+                une publication officielle.
+              </p>
+            )}
+            {item.body.map((p, i) => (
+              <p key={i}>{p}</p>
+            ))}
+            {item.gallery && item.gallery.length > 0 && (
+              <>
+                <h2>En images</h2>
+                <div className="gallery">
+                  {item.gallery.map((src, i) => (
+                    <figure key={i}>
+                      <img
+                        src={src}
+                        alt={`${item.title} — illustration ${i + 1}`}
+                        width={1200}
+                        height={800}
+                        loading="lazy"
+                      />
+                      {source === "demo" && (
+                        <figcaption>
+                          Illustration {i + 1} — image générée pour la présentation du portail
+                        </figcaption>
+                      )}
+                    </figure>
+                  ))}
+                </div>
+              </>
+            )}
+            {kind === "projets" && (
+              <>
+                <h2>Une démarche partagée</h2>
+                <p>
+                  La préparation implique les acteurs locaux, les collectivités et les structures de
+                  transmission. Les modalités et les ressources seront définies avec les partenaires
+                  concernés.
+                </p>
+                <h2>Suivi et perspectives</h2>
+                <p>
+                  Les actions feront l’objet d’un suivi portant sur la participation, les
+                  compétences transmises et la qualité des collaborations.
+                </p>
+              </>
+            )}
+            {kind === "annonces" && (
+              <div className="info-band">
+                <h3>Document et renseignements</h3>
+                <p>
+                  Consultez la version texte de cette annonce. Les pièces officielles seront
+                  ajoutées après validation.
+                </p>
+                <Button variant="outline" onClick={download}>
+                  <Download />
+                  Télécharger le texte
+                </Button>
+                <p>
+                  Pour toute précision :{" "}
+                  <Link to="/contact" className="underline">
+                    contacter la Direction
+                  </Link>
+                  .
+                </p>
+              </div>
+            )}
+            {kind === "galeries" && <GalleryViewer />}
+            {kind === "agenda" && item.location && (
+              <>
+                <h2>Le rendez-vous sur le territoire</h2>
+                <div className="map-panel">
+                  <div>
+                    <MapPin className="mx-auto mb-3" />
+                    <p>{item.location}, région des Plateaux</p>
+                    <a
+                      className="section-link"
+                      target="_blank"
+                      rel="noreferrer"
+                      href={`https://www.openstreetmap.org/search?query=${encodeURIComponent(item.location + " Togo")}`}
+                    >
+                      Voir la localité sur OpenStreetMap
+                      <ArrowRight size={14} />
+                    </a>
+                  </div>
+                </div>
+              </>
+            )}
+            <div className="quick-links">
+              <Button variant="outline" onClick={share}>
+                {shared ? <Check /> : <Share2 />}
+                {shared ? "Lien copié" : "Partager"}
+              </Button>
+              <Button variant="outline" asChild>
+                <Link to={`/${kind}`}>
+                  Retour à la rubrique
+                  <ArrowLeft />
+                </Link>
+              </Button>
+            </div>
+          </div>
+          {items.length > 1 && (
+            <div className="mt-14">
+              <SectionHeading
+                eyebrow="Poursuivre la découverte"
+                title={kind === "agenda" ? "D’autres rendez-vous" : "À découvrir également"}
+              />
+              <div className="grid-3">
+                {items
+                  .filter((i) => i.slug !== slug)
+                  .slice(0, 3)
+                  .map((i) => (
+                    <ContentCard key={i.slug} item={i} kind={kind} />
+                  ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </section>
+    </>
+  );
+}
+const faqGroups = [
+  {
+    title: "La Direction et ses missions",
+    items: [
+      [
+        "Quel est le rôle de la Direction régionale ?",
+        "Elle contribue à la promotion des arts et de la culture, à la valorisation du patrimoine et à l’accompagnement des acteurs du territoire. Les attributions administratives détaillées doivent être confirmées par les textes en vigueur.",
+      ],
+      [
+        "Quel territoire est concerné ?",
+        "Le portail est consacré à la région des Plateaux au Togo, notamment aux dynamiques culturelles d’Atakpamé, de Kpalimé, de Notsé et des autres localités.",
+      ],
+    ],
+  },
+  {
+    title: "Projets et participation",
+    items: [
+      [
+        "Comment proposer un projet culturel ?",
+        "Préparez une présentation avec les objectifs, le public, le calendrier et le budget envisagé. Contactez ensuite la Direction pour connaître les modalités officielles de dépôt.",
+      ],
+      [
+        "Les appels à projets affichés sont-ils ouverts ?",
+        "Non. Les annonces de cette version sont des exemples éditoriaux. Aucun dispositif réel ni financement n’est ouvert sur ce portail de présentation.",
+      ],
+      [
+        "Comment faire référencer une activité artistique ?",
+        "Le référencement de profils nécessite des informations vérifiées et le consentement de l’artiste. Les modalités seront précisées avant l’ouverture d’un annuaire officiel.",
+      ],
+    ],
+  },
+  {
+    title: "Agenda et ressources",
+    items: [
+      [
+        "Comment connaître les conditions d’un événement ?",
+        "La fiche de chaque rendez-vous présente les informations pratiques. Les dates de cette version sont indicatives et devront être validées par l’organisateur.",
+      ],
+      [
+        "Puis-je réutiliser les images du site ?",
+        "Les visuels de présentation sont générés. Avant toute réutilisation dans un contexte officiel, vérifiez les droits applicables et privilégiez des photographies documentaires autorisées.",
+      ],
+    ],
+  },
+];
+export function SearchPage({ q = "" }: { q?: string }) {
+  const [input, setInput] = useState(q);
+  const [page, setPage] = useState(1);
+  const navigate = useNavigate();
+  useEffect(() => {
+    setInput(q);
+    setPage(1);
+  }, [q]);
+  const results = q
+    ? searchable.filter(({ item }) =>
+        normalize(item.title + " " + item.summary + " " + item.category).includes(normalize(q)),
+      )
+    : [];
+  return (
+    <>
+      <PageBanner {...pageInfo.recherche} />
+      <section className="section">
+        <div className="wrap">
+          <form
+            className="filters"
+            onSubmit={(e) => {
+              e.preventDefault();
+              navigate({ to: "/recherche", search: { q: input } });
+            }}
+          >
+            <label className="search-field">
+              <Search />
+              <input
+                aria-label="Rechercher sur le portail"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                placeholder="Un thème, une localité, une actualité…"
+              />
+            </label>
+            <Button type="submit">
+              Rechercher
+              <ArrowRight />
+            </Button>
+          </form>
+          {q ? (
+            <>
+              <p className="mb-6 text-muted-foreground" aria-live="polite">
+                {results.length} résultat{results.length > 1 ? "s" : ""} pour « {q} »
+              </p>
+              {results.length ? (
+                <div className="grid-3">
+                  {results.slice((page - 1) * 6, page * 6).map(({ kind, item }) => (
+                    <ContentCard key={kind + item.slug} kind={kind} item={item} />
+                  ))}
+                </div>
+              ) : (
+                <div className="empty">
+                  <h2>Aucun résultat pour cette recherche</h2>
+                  <p className="mt-3">
+                    Essayez un terme plus général, comme « patrimoine » ou « Kpalimé ».
+                  </p>
+                </div>
+              )}
+              <Pagination page={page} setPage={setPage} total={Math.ceil(results.length / 6)} />
+            </>
+          ) : (
+            <div className="empty">
+              <h2>Que souhaitez-vous découvrir ?</h2>
+              <p className="mt-3">
+                Explorez les actualités, les patrimoines et les rendez-vous des Plateaux.
+              </p>
+            </div>
+          )}
+        </div>
+      </section>
+    </>
+  );
+}
+function ContactForm() {
+  const [prepared, setPrepared] = useState(false);
+  const [message, setMessage] = useState("");
+  return (
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        setPrepared(true);
+      }}
+    >
+      <div className="form-grid">
+        <label>
+          Nom et prénom *<input required name="name" autoComplete="name" placeholder="Votre nom" />
+        </label>
+        <label>
+          Adresse e-mail *
+          <input
+            required
+            type="email"
+            name="email"
+            autoComplete="email"
+            placeholder="vous@exemple.com"
+          />
+        </label>
+        <label className="form-wide">
+          Objet *
+          <select aria-label="Objet" required name="subject">
+            <option value="">Sélectionner un objet</option>
+            <option>Projet culturel</option>
+            <option>Patrimoine et documentation</option>
+            <option>Information institutionnelle</option>
+            <option>Autre demande</option>
+          </select>
+        </label>
+        <label className="form-wide">
+          Votre message *
+          <textarea
+            required
+            rows={6}
+            name="message"
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            placeholder="Présentez votre demande…"
+          />
+        </label>
+      </div>
+      <label className="flex items-start gap-3 text-xs mt-5">
+        <input type="checkbox" required className="mt-1" />{" "}
+        <span>
+          J’ai lu la{" "}
+          <Link to="/confidentialite" className="underline">
+            politique de confidentialité
+          </Link>{" "}
+          et j’accepte l’utilisation de mes informations pour traiter ma demande.
+        </span>
+      </label>
+      <p className="meta mt-4">Le formulaire de présentation n’envoie aucun message.</p>
+      <Button type="submit" className="mt-5">
+        Préparer ma demande
+        <ArrowRight />
+      </Button>
+      {prepared && (
+        <div role="status" className="info-band">
+          <h3>Votre demande est prête, mais n’a pas été envoyée.</h3>
+          <p>L’adresse officielle doit être confirmée avant de pouvoir contacter la Direction.</p>
+          <Button
+            variant="outline"
+            onClick={async () => {
+              try {
+                await navigator.clipboard.writeText(message);
+              } catch {}
+            }}
+          >
+            Copier mon message
+          </Button>
+        </div>
+      )}
+    </form>
+  );
+}
+export function StaticPage({
+  slug,
+  galeries,
+  videos,
+}: {
+  slug: keyof typeof pageInfo;
+  galeries?: ContentItem[];
+  videos?: ContentItem[];
+}) {
+  const info = pageInfo[slug];
+  if (!info) return <MissingPage />;
+  return (
+    <>
+      <PageBanner {...info} />
+      <section className="section">
+        <div className="wrap">
+          {slug === "la-direction" && (
+            <>
+              <div className="institution-row">
+                <div>
+                  <div className="eyebrow text-gold-foreground">Au service du territoire</div>
+                  <h2>
+                    Accompagner les cultures,
+                    <br />
+                    relier les générations
+                  </h2>
+                  <p>
+                    La Direction régionale des arts et de la culture des Plateaux est présentée ici
+                    comme un espace de dialogue entre institutions, créateurs, communautés et
+                    publics.
+                  </p>
+                  <p className="mt-4">
+                    Son action s’inscrit dans une volonté de valoriser les expressions culturelles
+                    locales et d’encourager l’accès à la création, dans le respect de la diversité.
+                  </p>
+                  <div className="quick-links">
+                    <Button variant="outline" asChild>
+                      <Link to="/missions">
+                        Nos missions
+                        <ArrowRight />
+                      </Link>
+                    </Button>
+                    <Button variant="outline" asChild>
+                      <Link to="/organisation">
+                        Notre organisation
+                        <ArrowRight />
+                      </Link>
+                    </Button>
+                  </div>
+                </div>
+                <img
+                  src={images.exhibition}
+                  alt="Illustration de rencontre culturelle"
+                  loading="lazy"
+                  width={1200}
+                  height={800}
+                />
+              </div>
+              <div className="prose">
+                <h2>Un territoire de mémoire et de création</h2>
+                <p>
+                  Les Plateaux rassemblent des lieux historiques, des traditions vivantes et des
+                  savoir-faire reconnus. Atakpamé, Notsé et Kpalimé témoignent de cette diversité, à
+                  laquelle contribuent toutes les localités de la région.
+                </p>
+                <h2>Nos valeurs</h2>
+                <ul>
+                  <li>Le respect de la diversité culturelle et des droits des communautés.</li>
+                  <li>La transmission entre générations et l’ouverture aux jeunes publics.</li>
+                  <li>La coopération avec les acteurs du territoire.</li>
+                  <li>L’accessibilité et la qualité de l’information publique.</li>
+                </ul>
+                <h2>Une vision partagée</h2>
+                <p>
+                  Faire de la culture une ressource vivante : une mémoire qui éclaire le présent,
+                  une création qui ouvre des perspectives et un lien qui rassemble les habitants.
+                </p>
+                <div className="info-band">
+                  <h3>Le mot de la Direction</h3>
+                  <p>
+                    « Notre région possède une richesse culturelle qui mérite d’être connue et
+                    transmise. En réunissant les initiatives, nous souhaitons ouvrir de nouveaux
+                    espaces de rencontre et de partage. »
+                  </p>
+                  <p className="meta">
+                    Message de présentation proposé, à valider par la Direction.
+                  </p>
+                </div>
+              </div>
+            </>
+          )}
+          {slug === "missions" && (
+            <>
+              <SectionHeading eyebrow="Notre engagement" title="Quatre axes pour agir" />
+              <div className="grid-2">
+                {(
+                  [
+                    [
+                      Palette,
+                      "Soutenir la création",
+                      "Favoriser la rencontre des artistes, la circulation des œuvres et la reconnaissance des pratiques contemporaines.",
+                    ],
+                    [
+                      Landmark,
+                      "Valoriser le patrimoine",
+                      "Contribuer à la connaissance des sites, des récits et des savoir-faire, en associant les communautés concernées.",
+                    ],
+                    [
+                      Users,
+                      "Accompagner les acteurs",
+                      "Orienter les associations, les artisans et les structures dans la préparation de leurs initiatives culturelles.",
+                    ],
+                    [
+                      BookOpen,
+                      "Transmettre et sensibiliser",
+                      "Encourager la médiation, l’éducation artistique et le dialogue entre les générations.",
+                    ],
+                  ] as const
+                ).map(([Icon, title, text]) => (
+                  <div className="announcement" key={String(title)}>
+                    {Icon && <Icon size={26} className="text-gold-foreground" />}
+                    <h3>{String(title)}</h3>
+                    <p>{String(text)}</p>
+                  </div>
+                ))}
+              </div>
+              <div className="prose">
+                <h2>Un accompagnement de proximité</h2>
+                <p>
+                  L’orientation, la mise en relation et le partage d’informations permettent aux
+                  porteurs de projets de mieux identifier les ressources disponibles. Les services
+                  et compétences réglementaires seront précisés après validation institutionnelle.
+                </p>
+              </div>
+            </>
+          )}
+          {slug === "organisation" && (
+            <>
+              <div className="prose">
+                <h2>Une coordination régionale</h2>
+                <p>
+                  L’organisation présentée est une proposition fonctionnelle. L’organigramme
+                  officiel et les noms des responsables doivent être confirmés par la Direction.
+                </p>
+                <div className="info-band">
+                  <h3>Direction régionale</h3>
+                  <p>
+                    Coordination des activités, dialogue institutionnel et suivi des orientations
+                    culturelles.
+                  </p>
+                </div>
+              </div>
+              <div className="grid-3">
+                {[
+                  [
+                    "Patrimoine et documentation",
+                    "Connaissance des patrimoines, ressources et médiation.",
+                  ],
+                  [
+                    "Arts et vie culturelle",
+                    "Accompagnement des créateurs et des initiatives locales.",
+                  ],
+                  ["Administration et accueil", "Information du public et suivi administratif."],
+                ].map(([t, p]) => (
+                  <div className="announcement" key={t}>
+                    <h3>{t}</h3>
+                    <p>{p}</p>
+                    <span className="meta">Responsable : à confirmer</span>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+          {slug === "patrimoine" && (
+            <>
+              <SectionHeading eyebrow="Explorer nos héritages" title="Des cultures vivantes" />
+              <HeritageCards />
+              <div className="prose">
+                <h2>Une mémoire plurielle</h2>
+                <p>
+                  La région des Plateaux est un territoire de diversité. Les fêtes de récolte, les
+                  expressions musicales, l’artisanat et les sites historiques y occupent une place
+                  importante dans la vie des communautés.
+                </p>
+                <p>
+                  La valorisation de ces héritages exige une démarche attentive aux contextes et aux
+                  droits de celles et ceux qui les portent.
+                </p>
+              </div>
+            </>
+          )}
+          {slug === "arts-traditionnels" && (
+            <>
+              <div className="institution-row">
+                <img
+                  src={images.dance}
+                  alt="Illustration de danses et percussions"
+                  width={1200}
+                  height={800}
+                  loading="lazy"
+                />
+                <div>
+                  <h2>Des expressions qui rassemblent</h2>
+                  <p>
+                    Danses, percussions, chants et savoir-faire artisanaux accompagnent la vie des
+                    communautés. Ils transmettent des récits, des gestes et des manières de créer
+                    ensemble.
+                  </p>
+                  <p className="mt-4">
+                    À Kpalimé, le batik, le tissage et la sculpture témoignent de la richesse de la
+                    création artisanale.
+                  </p>
+                </div>
+              </div>
+              <div className="prose">
+                <h2>Fêtes et transmission</h2>
+                <p>
+                  Agbogbo-Zan à Notsé, Odon-Itchu à Atakpamé et Dzawuza dans le Kloto sont des
+                  expressions importantes de la mémoire et de la vie collective. Leurs calendriers
+                  et leurs rites doivent être présentés avec les communautés organisatrices.
+                </p>
+                <h2>Respecter les savoirs</h2>
+                <p>
+                  La documentation et la diffusion des pratiques doivent prendre en compte le
+                  consentement, les usages et les éventuelles restrictions de partage.
+                </p>
+              </div>
+              <SectionHeading eyebrow="Pour aller plus loin" title="Les savoir-faire à découvrir" />
+              <div className="grid-3">
+                {content.artistes.map((i) => (
+                  <ContentCard kind="artistes" item={i} key={i.slug} />
+                ))}
+              </div>
+            </>
+          )}
+          {slug === "patrimoine-culturel" && (
+            <>
+              <img
+                src={images.heritage}
+                alt="Illustration du patrimoine paysager des Plateaux"
+                className="detail-image"
+                width={1200}
+                height={800}
+                loading="lazy"
+              />
+              <div className="prose">
+                <h2>Le patrimoine matériel</h2>
+                <p>
+                  À Notsé, les vestiges de l’Agbogbo rappellent une histoire majeure des communautés
+                  éwé. Près d’Atakpamé, le site de Kamina témoigne de l’histoire des communications
+                  et de la période coloniale.
+                </p>
+                <h2>Le patrimoine immatériel</h2>
+                <p>
+                  Les récits, les fêtes, les expressions musicales et les savoir-faire constituent
+                  un patrimoine vivant. Sa sauvegarde repose sur la participation des détenteurs de
+                  connaissances.
+                </p>
+                <h2>Des paysages liés à la mémoire</h2>
+                <p>
+                  Le mont Agou, point culminant du Togo, et les cascades de la région de Badou
+                  participent à la singularité des Plateaux. Leur découverte doit respecter les
+                  populations et les milieux naturels.
+                </p>
+                <h2>Préserver ensemble</h2>
+                <p>
+                  Documenter, sensibiliser et transmettre sont des démarches complémentaires. La
+                  conservation ne saurait être dissociée de la vie des communautés et de leurs
+                  attentes.
+                </p>
+              </div>
+            </>
+          )}
+          {slug === "mediatheque" && (
+            <>
+              <div className="quick-links">
+                <Button variant="outline" asChild>
+                  <Link to="/galeries">
+                    Galeries photo
+                    <ArrowRight />
+                  </Link>
+                </Button>
+                <Button variant="outline" asChild>
+                  <Link to="/videos">
+                    Vidéos
+                    <Play />
+                  </Link>
+                </Button>
+                <Button variant="outline" asChild>
+                  <Link to="/recherche" search={{ q: "patrimoine" }}>
+                    Récits et reportages
+                    <Search />
+                  </Link>
+                </Button>
+              </div>
+              <SectionHeading
+                eyebrow="Galeries"
+                title="Les Plateaux en images"
+                path="/galeries"
+                label="Toutes les galeries"
+              />
+              <div className="grid-3">
+                {(galeries ?? content.galeries).map((i) => (
+                  <ContentCard kind="galeries" item={i} key={i.slug} />
+                ))}
+              </div>
+              <div className="mt-12">
+                <SectionHeading
+                  eyebrow="Récits visuels"
+                  title="Des regards à partager"
+                  path="/videos"
+                  label="Toutes les vidéos"
+                />
+                <div className="grid-3">
+                  {(videos ?? content.videos).map((i) => (
+                    <ContentCard kind="videos" item={i} key={i.slug} />
+                  ))}
+                </div>
+              </div>
+            </>
+          )}
+          {slug === "partenaires" && (
+            <>
+              <PartnerGrid />
+              <div className="prose">
+                <p>
+                  Cette page présente des catégories de coopération et des institutions de
+                  référence. Elle ne revendique aucun partenariat formalisé sans confirmation.
+                </p>
+                <h2>Institutions publiques</h2>
+                <p>
+                  Le dialogue avec les services de l’État et les collectivités territoriales permet
+                  de relier les priorités culturelles aux besoins locaux.
+                </p>
+                <h2>Coopération culturelle</h2>
+                <p>
+                  Les organisations engagées dans la culture, dont l’UNESCO, constituent des
+                  références pour la sauvegarde du patrimoine et la diversité des expressions
+                  culturelles. Les accords effectifs seront précisés ici après validation.
+                </p>
+                <h2>Associations et acteurs locaux</h2>
+                <p>
+                  Artisans, artistes, associations et structures éducatives jouent un rôle essentiel
+                  dans la préparation et la mise en œuvre des initiatives.
+                </p>
+                <Button variant="outline" asChild className="mt-5">
+                  <Link to="/contact">
+                    Construire une coopération
+                    <ArrowRight />
+                  </Link>
+                </Button>
+              </div>
+            </>
+          )}
+          {slug === "contact" && (
+            <div className="grid-2">
+              <div>
+                <h2 className="text-2xl text-primary mb-5">Parlons de votre initiative</h2>
+                <ContactForm />
+              </div>
+              <div>
+                <div className="info-band mt-0">
+                  <h3>Direction régionale des arts et de la culture</h3>
+                  <p className="flex items-center gap-2">
+                    <MapPin size={16} />
+                    Région des Plateaux, Togo
+                  </p>
+                  <p>Adresse : en attente de confirmation officielle.</p>
+                  <p>Téléphone : à confirmer.</p>
+                  <p>E-mail : à confirmer.</p>
+                  <p>Horaires d’accueil : à confirmer.</p>
+                </div>
+                <div className="map-panel">
+                  <div>
+                    <MapPin className="mx-auto mb-4" />
+                    <h3 className="font-serif text-xl text-primary">Région des Plateaux</h3>
+                    <p className="text-sm text-muted-foreground my-3">
+                      La localisation précise des bureaux sera ajoutée après confirmation.
+                    </p>
+                    <a
+                      href="https://www.openstreetmap.org/search?query=Atakpame%20Togo"
+                      target="_blank"
+                      rel="noreferrer"
+                      className="section-link"
+                    >
+                      Découvrir Atakpamé sur la carte
+                      <ArrowRight size={14} />
+                    </a>
+                  </div>
+                </div>
+                <p className="meta mt-5">
+                  Les comptes sociaux officiels seront ajoutés après validation.
+                </p>
+              </div>
+            </div>
+          )}
+          {slug === "faq" && (
+            <div className="prose">
+              {faqGroups.map((g) => (
+                <div key={g.title}>
+                  <h2>{g.title}</h2>
+                  {g.items.map(([q, a]) => (
+                    <details className="faq-item" key={q}>
+                      <summary>{q}</summary>
+                      <p>{a}</p>
+                    </details>
+                  ))}
+                </div>
+              ))}
+            </div>
+          )}
+          {slug === "archives" && <ArchiveExplorer />}
+          {slug === "mentions-legales" && (
+            <div className="prose">
+              <h2>Édition du portail</h2>
+              <p>
+                Portail de présentation de la Direction régionale des arts et de la culture des
+                Plateaux, Togo. L’identité de l’éditeur légal, l’adresse administrative et le
+                responsable de publication doivent être confirmés avant une mise en ligne
+                officielle.
+              </p>
+              <h2>Statut des contenus</h2>
+              <p>
+                Les événements, annonces, programmes et messages institutionnels sont des exemples
+                éditoriaux. Ils ne valent ni communiqué officiel, ni engagement de financement. Les
+                visuels sont des illustrations générées.
+              </p>
+              <h2>Propriété intellectuelle</h2>
+              <p>
+                Les contenus documentaires et photographiques définitifs devront faire l’objet d’une
+                vérification des droits de publication. La citation des communautés et des créateurs
+                doit respecter leurs droits.
+              </p>
+              <h2>Hébergement et responsabilité</h2>
+              <p>
+                Les coordonnées de l’hébergeur seront ajoutées après choix du mode d’exploitation.
+                L’éditeur prendra les mesures nécessaires pour maintenir les informations à jour et
+                corriger les erreurs signalées.
+              </p>
+              <h2>Liens externes</h2>
+              <p>
+                Les sites tiers sont responsables de leurs propres contenus. Les liens proposés ne
+                constituent pas une approbation de toutes leurs publications.
+              </p>
+              <h2>Contact</h2>
+              <p>
+                Pour signaler une erreur, les coordonnées officielles seront disponibles sur la{" "}
+                <Link to="/contact" className="underline">
+                  page Contact
+                </Link>{" "}
+                après validation.
+              </p>
+            </div>
+          )}
+          {slug === "confidentialite" && (
+            <div className="prose">
+              <h2>Un principe de transparence</h2>
+              <p>
+                Cette version de présentation ne crée aucun compte utilisateur et ne transmet pas
+                les messages du formulaire de contact. Les textes saisis restent dans la page
+                jusqu’à sa fermeture.
+              </p>
+              <h2>Données de contact</h2>
+              <p>
+                Si un service d’envoi est activé, les nom, adresse e-mail, objet et message seront
+                utilisés uniquement pour répondre à la demande. Le responsable, la base légale et la
+                durée de conservation devront être précisés avant activation.
+              </p>
+              <h2>Cookies et services externes</h2>
+              <p>
+                Aucun outil de mesure d’audience n’a été ajouté au portail. Les polices peuvent être
+                chargées depuis un service externe. Les liens vers les plateformes sociales et
+                cartographiques ouvrent leurs propres sites, soumis à leurs politiques.
+              </p>
+              <h2>Vos droits</h2>
+              <p>
+                La politique définitive précisera les modalités d’accès, de rectification et de
+                suppression, ainsi que les voies de recours prévues par le droit applicable au Togo.
+              </p>
+              <h2>Sécurité et conservation</h2>
+              <p>
+                Le portail officiel devra limiter les accès, protéger les échanges et définir une
+                durée de conservation proportionnée aux demandes traitées.
+              </p>
+              <h2>Mise à jour</h2>
+              <p>
+                Ce texte est une base de travail et doit être validé par le responsable de
+                traitement avant la collecte effective de données.
+              </p>
+            </div>
+          )}
+          {slug === "plan-du-site" && (
+            <div className="grid-3">
+              {(Object.keys(pageInfo) as Array<keyof typeof pageInfo>)
+                .filter((s) => s !== "plan-du-site")
+                .map((s) => (
+                  <div key={s} className="border-b border-border py-4">
+                    <Link to={pagePaths[s]} className="section-link">
+                      {pageInfo[s].title}
+                      <ArrowRight size={14} />
+                    </Link>
+                    {s in content && (
+                      <ul className="mt-3">
+                        {content[s as ContentKind].map((item) => (
+                          <li className="text-xs text-muted-foreground my-2" key={item.slug}>
+                            <ItemLink kind={s as ContentKind} item={item}>
+                              {item.title}
+                            </ItemLink>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                ))}
+            </div>
+          )}
+        </div>
+      </section>
+      {!["contact", "mentions-legales", "confidentialite", "plan-du-site", "archives"].includes(
+        slug,
+      ) && <ContactBand />}
+    </>
+  );
+}
+function ArchiveExplorer() {
+  const [year, setYear] = useState("2026");
+  const [theme, setTheme] = useState("");
+  const [kind, setKind] = useState("");
+  const [page, setPage] = useState(1);
+  const results = searchable.filter(
+    (r) =>
+      (!year || r.item.date.includes(year)) &&
+      (!theme || r.item.category === theme) &&
+      (!kind || r.kind === kind),
+  );
+  return (
+    <>
+      <div className="filters">
+        <select
+          aria-label="Année"
+          value={year}
+          onChange={(e) => {
+            setYear(e.target.value);
+            setPage(1);
+          }}
+        >
+          <option value="">Toutes les années</option>
+          <option>2026</option>
+          <option>2027</option>
+          <option>2028</option>
+        </select>
+        <select
+          aria-label="Thème culturel"
+          value={theme}
+          onChange={(e) => {
+            setTheme(e.target.value);
+            setPage(1);
+          }}
+        >
+          <option value="">Tous les thèmes</option>
+          {[...new Set(searchable.map((r) => r.item.category))].map((c) => (
+            <option key={c}>{c}</option>
+          ))}
+        </select>
+        <select
+          aria-label="Type de contenu"
+          value={kind}
+          onChange={(e) => {
+            setKind(e.target.value);
+            setPage(1);
+          }}
+        >
+          <option value="">Tous les contenus</option>
+          {kinds.map((k) => (
+            <option key={k} value={k}>
+              {pageInfo[k].title}
+            </option>
+          ))}
+        </select>
+      </div>
+      <p className="meta mb-5">
+        {results.length} publication{results.length > 1 ? "s" : ""}
+      </p>
+      {results.length ? (
+        <div className="grid-3">
+          {results.slice((page - 1) * 6, page * 6).map((r) => (
+            <ContentCard key={r.kind + r.item.slug} {...r} />
+          ))}
+        </div>
+      ) : (
+        <div className="empty">Aucune publication pour ces critères.</div>
+      )}
+      <Pagination page={page} setPage={setPage} total={Math.ceil(results.length / 6)} />
+    </>
+  );
+}
+export function MissingPage() {
+  const navigate = useNavigate();
+  const [q, setQ] = useState("");
+  return (
+    <>
+      <PageBanner
+        title="Page introuvable"
+        intro="Cette page a peut-être été déplacée, ou l’adresse n’est pas correcte."
+      />
+      <section className="section">
+        <div className="wrap prose text-center">
+          <div className="font-serif text-7xl text-gold-foreground">404</div>
+          <h2>Retrouvons votre chemin</h2>
+          <p>Explorez les rubriques du portail ou lancez une recherche.</p>
+          <form
+            className="filters"
+            onSubmit={(e) => {
+              e.preventDefault();
+              navigate({ to: "/recherche", search: { q } });
+            }}
+          >
+            <input
+              aria-label="Rechercher une page"
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder="Votre recherche"
+              className="flex-1"
+            />
+            <Button type="submit">
+              <Search />
+              Rechercher
+            </Button>
+          </form>
+          <div className="quick-links justify-center">
+            <Button asChild>
+              <Link to="/">Retour à l’accueil</Link>
+            </Button>
+            <Button variant="outline" asChild>
+              <Link to="/agenda">Agenda culturel</Link>
+            </Button>
+            <Button variant="outline" asChild>
+              <Link to="/plan-du-site">Plan du site</Link>
+            </Button>
+          </div>
+        </div>
+      </section>
+    </>
+  );
+>>>>>>> Stashed changes
+}

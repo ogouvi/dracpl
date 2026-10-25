@@ -10,10 +10,15 @@ const eventPost: WpPost = {
   date: "2026-10-05T09:56:17",
   title: { rendered: "Les rythmes de Kpalim&#8217;é" },
   excerpt: { rendered: "<p>Un temps de partage entre musiciens et publics. […]</p>" },
-  content: { rendered: "<p>Le festival réunit les groupes locaux.</p>\n<p>Les échanges se poursuivent le lendemain.</p>" },
+  content: {
+    rendered:
+      "<p>Le festival réunit les groupes locaux.</p>\n<p>Les échanges se poursuivent le lendemain.</p>",
+  },
   acf: { ville: "Kpalimé", horaire: "14 h 00 – 19 h 00", lieu: "Place des artisans" },
   _embedded: {
-    "wp:featuredmedia": [{ source_url: "https://cms.drac-plateaux.tg/wp-content/uploads/2026/10/cover.jpg" }],
+    "wp:featuredmedia": [
+      { source_url: "https://cms.drac-plateaux.tg/wp-content/uploads/2026/10/cover.jpg" },
+    ],
     "wp:term": [[{ taxonomy: "category", slug: "agenda", name: "Agenda" }]],
   },
 };
@@ -35,11 +40,19 @@ describe("WordPress editorial content", () => {
     expect(item.time).toBe("14 h 00 – 19 h 00");
     expect(item.category).toBe("Agenda");
     expect(item.image).toBe("https://cms.drac-plateaux.tg/wp-content/uploads/2026/10/cover.jpg");
-    expect(item.body).toEqual(["Le festival réunit les groupes locaux.", "Les échanges se poursuivent le lendemain."]);
+    expect(item.body).toEqual([
+      "Le festival réunit les groupes locaux.",
+      "Les échanges se poursuivent le lendemain.",
+    ]);
   });
 
   it("keeps an event without its ACF details readable instead of inventing them", () => {
-    const bare: WpPost = { slug: "sans-champs", date: "2026-11-08T10:00:00", title: { rendered: "Rencontre" }, content: { rendered: "<p>Texte.</p>" } };
+    const bare: WpPost = {
+      slug: "sans-champs",
+      date: "2026-11-08T10:00:00",
+      title: { rendered: "Rencontre" },
+      content: { rendered: "<p>Texte.</p>" },
+    };
     const item = mapWpPost(bare, "agenda", "https://example.org/illustration.jpg");
 
     expect(item.location).toBeUndefined();
@@ -53,14 +66,14 @@ describe("WordPress editorial content", () => {
     expect(result.source).toBe("demo");
     expect(result.items).toBe(content.agenda);
     expect(resolveResult("actualites", []).source).toBe("demo");
-    expect(resolveResult("actualites", [mapWpPost(eventPost, "actualites", "x")], "wordpress").source).toBe("wordpress");
+    expect(
+      resolveResult("actualites", [mapWpPost(eventPost, "actualites", "x")], "wordpress").source,
+    ).toBe("wordpress");
   });
 
   it("turns WordPress article markup into plain paragraphs", () => {
-    expect(toParagraphs("<h2>Titre</h2><p>Un paragraphe.</p><script>evil()</script><p>Un autre.</p>")).toEqual([
-      "Titre",
-      "Un paragraphe.",
-      "Un autre.",
-    ]);
+    expect(
+      toParagraphs("<h2>Titre</h2><p>Un paragraphe.</p><script>evil()</script><p>Un autre.</p>"),
+    ).toEqual(["Titre", "Un paragraphe.", "Un autre."]);
   });
 });
