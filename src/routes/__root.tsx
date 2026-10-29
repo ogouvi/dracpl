@@ -14,6 +14,7 @@ import { MissingPage } from "@/components/portal/pages";
 import { Header, Footer } from "@/components/portal/chrome";
 import { Button } from "@/components/ui/button";
 
+import logo from "../assets/logo.png";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 
@@ -77,7 +78,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         rel: "stylesheet",
         href: appCss,
       },
-      { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
+      { rel: "icon", href: logo, type: "image/png" },
     ],
   }),
   shellComponent: RootShell,

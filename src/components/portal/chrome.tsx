@@ -1,7 +1,6 @@
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import {
-  Landmark,
   Search,
   Menu,
   X,
@@ -11,15 +10,15 @@ import {
   ChevronRight,
   Facebook,
   Instagram,
+  Music2,
 } from "lucide-react";
+import logo from "@/assets/logo.png";
 import { Button } from "@/components/ui/button";
 import { nav, pageInfo, pagePaths } from "@/lib/portal/content";
 export function Brand() {
   return (
     <Link to="/" className="brand" aria-label="Accueil — Direction des arts et de la culture">
-      <span className="emblem">
-        <Landmark size={29} strokeWidth={1.3} />
-      </span>
+      <img className="brand-logo" src={logo} alt="" />
       <span>
         <span className="brand-title block">
           Direction régionale des arts
@@ -29,6 +28,36 @@ export function Brand() {
         <span className="brand-sub block">Région des Plateaux · Togo</span>
       </span>
     </Link>
+  );
+}
+export function SocialLinks() {
+  return (
+    <div className="social-links flex gap-3" role="group" aria-label="Réseaux sociaux">
+      <a
+        href="https://www.tiktok.com"
+        aria-label="TikTok (plateforme externe)"
+        target="_blank"
+        rel="noreferrer"
+      >
+        <Music2 size={17} />
+      </a>
+      <a
+        href="https://www.instagram.com"
+        aria-label="Instagram (plateforme externe)"
+        target="_blank"
+        rel="noreferrer"
+      >
+        <Instagram size={17} />
+      </a>
+      <a
+        href="https://www.facebook.com"
+        aria-label="Facebook (plateforme externe)"
+        target="_blank"
+        rel="noreferrer"
+      >
+        <Facebook size={17} />
+      </a>
+    </div>
   );
 }
 export function Header() {
@@ -148,23 +177,8 @@ export function Footer() {
               Promouvoir la création, préserver les héritages et faire vivre les cultures des
               Plateaux.
             </p>
-            <div className="flex gap-3 mt-4">
-              <a
-                href="https://www.facebook.com"
-                aria-label="Facebook (plateforme externe)"
-                target="_blank"
-                rel="noreferrer"
-              >
-                <Facebook size={17} />
-              </a>
-              <a
-                href="https://www.instagram.com"
-                aria-label="Instagram (plateforme externe)"
-                target="_blank"
-                rel="noreferrer"
-              >
-                <Instagram size={17} />
-              </a>
+            <div className="mt-4">
+              <SocialLinks />
             </div>
           </div>
           <div>

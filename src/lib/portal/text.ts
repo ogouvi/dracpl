@@ -1,4 +1,4 @@
-// Plain-text helpers shared by every editorial source (WordPress, Hygraph).
+// Plain-text helpers shared by Hygraph content and demonstration content.
 
 const MONTHS = [
   "janvier",

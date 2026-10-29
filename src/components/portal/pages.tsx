@@ -30,7 +30,7 @@ import {
   type ContentKind,
   type ContentItem,
 } from "@/lib/portal/content";
-import { PageBanner, ContactBand } from "./chrome";
+import { PageBanner, ContactBand, SocialLinks } from "./chrome";
 import type { ContentSource } from "@/lib/portal/source";
 import {
   ContentCard,
@@ -222,19 +222,6 @@ export function ArchivePage({
     </>
   );
 }
-<<<<<<< Updated upstream
-function VisualStory() { const [playing,setPlaying]=useState(false); const [step,setStep]=useState(0);const slides=[images.dance,images.artisan,images.heritage,images.exhibition];useEffect(()=>{if(!playing)return;const timer=setInterval(()=>setStep(s=>{if(s===3){setPlaying(false);return 0;}return s+1;}),4000);return()=>clearInterval(timer);},[playing]);return <div><div className="relative"><img src={slides[step]} className="detail-image mb-0" alt={['Expressions culturelles','Savoir-faire artisanaux','Paysages des Plateaux','Création contemporaine'][step]} width={1200} height={800}/><Button variant="hero" size="icon" className="absolute bottom-5 left-5" onClick={()=>setPlaying(!playing)} aria-label={playing?'Mettre le récit en pause':'Lire le récit visuel'}>{playing?<Pause/>:<Play/>}</Button></div><div className="flex justify-between text-xs text-muted-foreground mt-3"><span>Récit visuel · Illustrations des Plateaux</span><span aria-live="polite">{String(step*4).padStart(2,'0')} / 16 secondes</span></div></div>; }
-export function DetailPage({kind,slug, items = content[kind], source = 'demo'}:{kind:ContentKind; slug:string; items?:ContentItem[]; source?:ContentSource}) {
- const item=items.find(i=>i.slug===slug); const [shared,setShared]=useState(false);
- if(!item)return <MissingPage/>;
- const share=async()=>{try {if(navigator.share)await navigator.share({title:item.title,url:window.location.href});else {await navigator.clipboard.writeText(window.location.href);setShared(true);}}catch{setShared(false);}};
- const download=()=>{const blob=new Blob([`${item.title}\n${item.date}\n\n${item.body.join('\n\n')}\n\nDocument de présentation — non officiel.`],{type:'text/plain;charset=utf-8'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`${item.slug}.txt`;a.click();URL.revokeObjectURL(url);};
- return <><PageBanner title={item.title} intro={item.summary} parent={{label:pageInfo[kind].title,path:kind}}/><section className="section"><div className="wrap"><div className="prose"><div className="meta mb-6"><span className="tag">{item.category}</span><CalendarDays size={13}/>{item.date}{item.status&&<span>{item.status}</span>}</div>{kind==='videos'?<VisualStory/>:<img src={item.image} alt={item.title} className="detail-image" width={1200} height={800}/>} {kind==='agenda'&&<div className="info-band"><h2 className="mt-0">Informations pratiques</h2><p className="flex items-center gap-2"><CalendarDays size={17}/>{item.date}</p>{item.time&&<p className="flex items-center gap-2"><Clock size={17}/>{item.time}</p>}{item.location&&<p className="flex items-center gap-2"><MapPin size={17}/>{item.location}{source==='demo'?' — lieu précis à confirmer':''}</p>}{source==='demo'&&<><p>Organisateur envisagé : acteurs culturels du territoire, en lien avec la Direction.</p><p>Public : tout public. Conditions d’accès à confirmer.</p></>}</div>}
- {source==='demo'&&(kind==='actualites'||kind==='agenda')&&<p className="meta">Informations et dates indicatives : cette version de présentation ne constitue pas une publication officielle.</p>}{item.body.map((p,i)=><p key={i}>{p}</p>)}{item.gallery&&item.gallery.length>0&&<><h2>En images</h2><div className="gallery">{item.gallery.map((src,i)=><figure key={i}><img src={src} alt={`${item.title} — illustration ${i+1}`} width={1200} height={800} loading="lazy"/>{source==='demo'&&<figcaption>Illustration {i+1} — image générée pour la présentation du portail</figcaption>}</figure>)}</div></>}{kind==='projets'&&<><h2>Une démarche partagée</h2><p>La préparation implique les acteurs locaux, les collectivités et les structures de transmission. Les modalités et les ressources seront définies avec les partenaires concernés.</p><h2>Suivi et perspectives</h2><p>Les actions feront l’objet d’un suivi portant sur la participation, les compétences transmises et la qualité des collaborations.</p></>}
- {item.documents&&item.documents.length>0&&<><h2>Documents à télécharger</h2><ul className="document-list">{item.documents.map((doc,i)=><li key={i}><Download size={15}/><a href={doc.url} target="_blank" rel="noreferrer noopener" download>{doc.name}</a></li>)}</ul></>}{kind==='annonces'&&<div className="info-band"><h3>Document et renseignements</h3><p>Consultez la version texte de cette annonce. Les pièces officielles seront ajoutées après validation.</p><Button variant="outline" onClick={download}><Download/>Télécharger le texte</Button><p>Pour toute précision : <Link to="/contact" className="underline">contacter la Direction</Link>.</p></div>}
- {kind==='galeries'&&<GalleryViewer/>}{kind==='agenda'&&item.location&&<><h2>Le rendez-vous sur le territoire</h2><div className="map-panel"><div><MapPin className="mx-auto mb-3"/><p>{item.location}, région des Plateaux</p><a className="section-link" target="_blank" rel="noreferrer" href={`https://www.openstreetmap.org/search?query=${encodeURIComponent(item.location+' Togo')}`}>Voir la localité sur OpenStreetMap<ArrowRight size={14}/></a></div></div></>}
- <div className="quick-links"><Button variant="outline" onClick={share}>{shared?<Check/>:<Share2/>}{shared?'Lien copié':'Partager'}</Button><Button variant="outline" asChild><Link to={`/${kind}`}>Retour à la rubrique<ArrowLeft/></Link></Button></div></div>{items.length>1&&<div className="mt-14"><SectionHeading eyebrow="Poursuivre la découverte" title={kind==='agenda'?'D’autres rendez-vous':'À découvrir également'}/><div className="grid-3">{items.filter(i=>i.slug!==slug).slice(0,3).map(i=><ContentCard key={i.slug} item={i} kind={kind}/>)}</div></div>}</div></section></>;
-=======
 function GalleryViewer() {
   const slides = [
     { src: images.artisan, label: "Gestes de tissage — illustration" },
@@ -505,6 +492,21 @@ export function DetailPage({
                   Les actions feront l’objet d’un suivi portant sur la participation, les
                   compétences transmises et la qualité des collaborations.
                 </p>
+              </>
+            )}
+            {item.documents && item.documents.length > 0 && (
+              <>
+                <h2>Documents à télécharger</h2>
+                <ul className="document-list">
+                  {item.documents.map((doc, i) => (
+                    <li key={i}>
+                      <Download size={15} />
+                      <a href={doc.url} target="_blank" rel="noreferrer noopener" download>
+                        {doc.name}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
               </>
             )}
             {kind === "annonces" && (
@@ -780,6 +782,9 @@ function ContactForm() {
     </form>
   );
 }
+
+
+
 export function StaticPage({
   slug,
   galeries,
@@ -1170,9 +1175,10 @@ export function StaticPage({
                     </a>
                   </div>
                 </div>
-                <p className="meta mt-5">
-                  Les comptes sociaux officiels seront ajoutés après validation.
-                </p>
+                <div className="mt-5">
+                  <h3 className="text-primary mb-3">Retrouvez-nous sur les réseaux</h3>
+                  <SocialLinks />
+                </div>
               </div>
             </div>
           )}
@@ -1424,5 +1430,4 @@ export function MissingPage() {
       </section>
     </>
   );
->>>>>>> Stashed changes
 }

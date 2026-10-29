@@ -1,12 +1,11 @@
-// Chooses where the portal's news and events come from:
-// a Hygraph workspace if one is configured, otherwise a WordPress site, otherwise the demonstration content.
+// Chooses between published Hygraph content and the demonstration content.
 // Demonstration content is always labelled as such and never presented as published editorial content.
 
 import { createServerFn } from "@tanstack/react-start";
 import { content, type ContentItem, type ContentKind } from "./content";
 import { loadFromHygraph } from "./hygraph";
 
-export type ContentSource = "wordpress" | "hygraph" | "demo";
+export type ContentSource = "hygraph" | "demo";
 export type PortalResult = { items: ContentItem[]; source: ContentSource };
 
 const OK_TTL = 60_000;
@@ -28,14 +27,6 @@ export function resetPortalCache(): void {
   cache.clear();
 }
 
-export function resolveResult(
-  kind: ContentKind,
-  items: ContentItem[] | null,
-  source: ContentSource = "demo",
-): PortalResult {
-  return items && items.length ? { items, source } : { items: content[kind], source: "demo" };
-}
-
 export async function resolvePortalItems(
   kind: ContentKind,
   env: Record<string, string | undefined>,
@@ -43,14 +34,12 @@ export async function resolvePortalItems(
   const key = JSON.stringify([
     kind,
     env["HYGRAPH_ENDPOINT"],
-    env["WORDPRESS_URL"],
     ...Object.values(HYGRAPH_MODEL_ENV).map((name) => env[name]),
   ]);
   const entry = cache.get(key);
   if (entry && Date.now() - entry.at < entry.ttl) return entry.result;
 
   const hygraphEndpoint = (env["HYGRAPH_ENDPOINT"] || "").trim();
-  const wordpressBase = (env["WORDPRESS_URL"] || "").replace(/\/+$/, "");
   let result: PortalResult = { items: content[kind], source: "demo" };
 
   if (hygraphEndpoint) {
@@ -73,21 +62,6 @@ export async function resolvePortalItems(
     }
   }
 
-  if (result.source === "demo" && wordpressBase && CATEGORY_SLUG[kind]) {
-    try {
-      const items = await loadFromWordPress(wordpressBase, kind);
-      if (items && items.length) result = { items, source: "wordpress" };
-      else
-        console.warn(
-          `WordPress n’a rien fourni pour « ${kind} » : repli sur le contenu de démonstration.`,
-        );
-    } catch (error) {
-      console.warn(
-        `WordPress indisponible pour « ${kind} » : ${error instanceof Error ? error.message : String(error)}`,
-      );
-    }
-  }
-
   cache.set(key, { at: Date.now(), ttl: result.source === "demo" ? EMPTY_TTL : OK_TTL, result });
   return result;
 }
@@ -95,7 +69,7 @@ export async function resolvePortalItems(
 export const getPortalItems = createServerFn({ method: "GET" })
   .inputValidator((input: { kind?: unknown }) => {
     const kind = input?.kind;
-    if (typeof kind !== "string" || (!(kind in CATEGORY_SLUG) && !(kind in HYGRAPH_MODEL_ENV)))
+    if (typeof kind !== "string" || !Object.hasOwn(content, kind))
       throw new Error("Rubrique non connectée à une source de contenu.");
     return { kind: kind as ContentKind };
   })
@@ -107,6 +81,5 @@ export const getPortalItems = createServerFn({ method: "GET" })
       HYGRAPH_ANNOUNCEMENT_MODEL: process.env["HYGRAPH_ANNOUNCEMENT_MODEL"],
       HYGRAPH_GALLERY_MODEL: process.env["HYGRAPH_GALLERY_MODEL"],
       HYGRAPH_VIDEO_MODEL: process.env["HYGRAPH_VIDEO_MODEL"],
-      WORDPRESS_URL: process.env["WORDPRESS_URL"],
     }),
   );

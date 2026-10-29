@@ -92,7 +92,7 @@ describe("Hygraph editorial content", () => {
     expect(mapHygraphRecord(news, "agenda", 0).location).toBeUndefined();
   });
 
-  it("labels an empty or unavailable workspace as demonstration content", async () => {
+  it("uses demonstration content when Hygraph is empty or unavailable", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn(async () => reply({ actualites: [] })),
@@ -131,13 +131,28 @@ describe("Hygraph editorial content", () => {
   it("reads announcements, galleries and videos from their own Hygraph models", async () => {
     const fetcher = vi.fn(async (_url: unknown, init?: RequestInit) => {
       const { query } = JSON.parse(String(init?.body));
-<<<<<<< Updated upstream
-      if (query.startsWith('{ annonces(')) return reply({ annonces: [{ ...news, slug: 'appel-projets', statut: 'Ouvert', documents: [{ url: 'https://cms.example.org/appel-a-projets.pdf', fileName: 'appel-a-projets.pdf' }, { url: 'https://cms.example.org/renseignements.pdf', fileName: 'fiche-renseignements.pdf' }, { url: '', fileName: 'sans-adresse.pdf' }, null] }] });
-      if (query.startsWith('{ galeries(')) return reply({ galeries: [{ ...news, slug: 'regards-plateaux', gallery: [{ url: 'https://cms.example.org/g1.jpg' }] }] });
-      if (query.startsWith('{ videos(')) return reply({ videos: [{ ...news, slug: 'recit-visuel', duree: '12 min' }] });
-=======
       if (query.startsWith("{ annonces("))
-        return reply({ annonces: [{ ...news, slug: "appel-projets", statut: "Ouvert" }] });
+        return reply({
+          annonces: [
+            {
+              ...news,
+              slug: "appel-projets",
+              statut: "Ouvert",
+              documents: [
+                {
+                  url: "https://cms.example.org/appel-a-projets.pdf",
+                  fileName: "appel-a-projets.pdf",
+                },
+                {
+                  url: "https://cms.example.org/renseignements.pdf",
+                  fileName: "fiche-renseignements.pdf",
+                },
+                { url: "", fileName: "sans-adresse.pdf" },
+                null,
+              ],
+            },
+          ],
+        });
       if (query.startsWith("{ galeries("))
         return reply({
           galeries: [
@@ -150,26 +165,24 @@ describe("Hygraph editorial content", () => {
         });
       if (query.startsWith("{ videos("))
         return reply({ videos: [{ ...news, slug: "recit-visuel", duree: "12 min" }] });
->>>>>>> Stashed changes
       return reply({});
     });
     vi.stubGlobal("fetch", fetcher);
 
-<<<<<<< Updated upstream
-    const annonces = await resolvePortalItems('annonces', { HYGRAPH_ENDPOINT: endpoint });
-    expect(annonces.source).toBe('hygraph');
-    expect(annonces.items[0]?.slug).toBe('appel-projets');
-    expect(annonces.items[0]?.status).toBe('Ouvert');
-    expect(annonces.items[0]?.documents).toEqual([
-      { url: 'https://cms.example.org/appel-a-projets.pdf', name: 'appel-a-projets.pdf' },
-      { url: 'https://cms.example.org/renseignements.pdf', name: 'fiche-renseignements.pdf' },
-    ]);
-=======
     const annonces = await resolvePortalItems("annonces", { HYGRAPH_ENDPOINT: endpoint });
     expect(annonces.source).toBe("hygraph");
     expect(annonces.items[0]?.slug).toBe("appel-projets");
     expect(annonces.items[0]?.status).toBe("Ouvert");
->>>>>>> Stashed changes
+    expect(annonces.items[0]?.documents).toEqual([
+      {
+        url: "https://cms.example.org/appel-a-projets.pdf",
+        name: "appel-a-projets.pdf",
+      },
+      {
+        url: "https://cms.example.org/renseignements.pdf",
+        name: "fiche-renseignements.pdf",
+      },
+    ]);
 
     const galeries = await resolvePortalItems("galeries", { HYGRAPH_ENDPOINT: endpoint });
     expect(galeries.source).toBe("hygraph");
@@ -180,28 +193,18 @@ describe("Hygraph editorial content", () => {
     expect(videos.items[0]?.duration).toBe("12 min");
   });
 
-  it("falls back to WordPress when Hygraph is empty and WordPress is configured", async () => {
-    vi.stubGlobal(
-      "fetch",
-      vi.fn(async (url: string) => {
-        if (url === endpoint) return reply({ actualites: [] });
-        if (url.includes("/categories?")) return new Response(JSON.stringify([{ id: 12 }]));
-        return new Response(
-          JSON.stringify([
-            {
-              slug: "article-wordpress",
-              date: "2026-10-21T12:00:00",
-              title: { rendered: "Article WordPress" },
-            },
-          ]),
-        );
-      }),
-    );
+  it("does not query WordPress when only demonstration content is available", async () => {
+    const fetcher = vi.fn(async () => reply({ actualites: [] }));
+    vi.stubGlobal("fetch", fetcher);
+
     const result = await resolvePortalItems("actualites", {
       HYGRAPH_ENDPOINT: endpoint,
       WORDPRESS_URL: "https://wordpress.example.org",
     });
-    expect(result.source).toBe("wordpress");
-    expect(result.items[0]?.slug).toBe("article-wordpress");
+
+    expect(result.source).toBe("demo");
+    expect(result.items).toBe(content.actualites);
+    expect(fetcher).toHaveBeenCalled();
+    expect(fetcher.mock.calls.every(([url]) => url === endpoint)).toBe(true);
   });
 });

@@ -3,7 +3,6 @@
 - [x] Build the homepage and all requested interior pages.
 - [x] Add search, filters, pagination, galleries, FAQ and contact form states.
 - [x] Verify navigation, search and mobile presentation.
-- [x] Build the WordPress reading layer for news and events (falls back to demonstration content).
-- [x] Finish and test the optional Hygraph reading layer for news and events.
+- [x] Finish and test the optional Hygraph reading layer for news and events, with demonstration content as fallback.
 - [x] Local VS Code workflow: `.env` support, `.env.example`, README steps.
 - [ ] Connect a real editorial workspace and verify published news and events (waiting for the user's Hygraph endpoint and published test items).

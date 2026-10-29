@@ -31,7 +31,21 @@ Other useful commands:
 npm run test    # checks the content sources and the pages
 npm run lint    # code style
 npm run build   # production build
+npm start       # run the production Node.js server after building
 ```
+
+## Deploy to a Node.js host
+
+The production build uses Nitro's `node-server` preset. It generates a Node.js server at `.output/server/index.mjs` alongside the static assets in `.output/public`.
+
+```sh
+npm ci
+npm run build
+test -f .output/server/index.mjs
+npm start
+```
+
+For Plesk, use a plan with Node.js application support, set the application root to the project, and configure the app to run `npm start` with the production Node.js version. Build the project after deploying its source and dependencies, then restart the application. Add `HYGRAPH_ENDPOINT` and any other required settings in Plesk's environment-variable settings; do not upload a local `.env` file. Confirm that your hosting plan's Node.js integration supports launching this Nitro server and listening on its assigned port.
 
 ## Connect your own content
 
@@ -41,8 +55,7 @@ Without any settings the portal shows clearly labelled demonstration content. To
 cp .env.example .env
 ```
 
-- **Hygraph** — Project settings → API Access → Content API: copy the Content Delivery API URL into `HYGRAPH_ENDPOINT`. Publish at least one item per section (only published content is read). Model API IDs: `actualites`, `evenements`, `annonces`, `galeries`, `videos`.
-- **WordPress** — put your site address in `WORDPRESS_URL` and publish posts in the `actualites` and `agenda` categories. Leave `HYGRAPH_ENDPOINT` empty.
+- **Hygraph** — Project settings → API Access → Content API: copy the Content Delivery API URL into `HYGRAPH_ENDPOINT`. Publish at least one item per section (only published content is read). Model API IDs: `actualites`, `evenements`, `annonces`, `galeries`, `videos`. If Hygraph is not configured or has no published content, the portal uses its labelled demonstration content.
 
 `.env` is ignored by git and never shared. On the hosted site the same names are filled in as project secrets, so nothing needs to be written into the code.
 
@@ -53,5 +66,5 @@ cp .env.example .env
 | `src/routes/` | one file per page address |
 | `src/components/portal/` | header, footer, cards, page layouts |
 | `src/lib/portal/content.ts` | demonstration editorial content |
-| `src/lib/portal/source.ts` | chooses Hygraph, WordPress or demonstration content |
+| `src/lib/portal/source.ts` | chooses Hygraph or demonstration content |
 | `src/styles.css` | colours, fonts, layout rules |
