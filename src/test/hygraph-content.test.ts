@@ -194,7 +194,7 @@ describe("Hygraph editorial content", () => {
   });
 
   it("does not query WordPress when only demonstration content is available", async () => {
-    const fetcher = vi.fn(async () => reply({ actualites: [] }));
+    const fetcher = vi.fn(async (_url: unknown) => reply({ actualites: [] }));
     vi.stubGlobal("fetch", fetcher);
 
     const result = await resolvePortalItems("actualites", {

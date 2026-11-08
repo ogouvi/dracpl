@@ -6,10 +6,11 @@ import { content, type ContentItem, type ContentKind } from "./content";
 import { loadFromHygraph } from "./hygraph";
 
 export type ContentSource = "hygraph" | "demo";
-export type PortalResult = { items: ContentItem[]; source: ContentSource };
+export type PortalResult = { items: ContentItem[]; source: ContentSource; unavailable?: boolean };
 
 const OK_TTL = 60_000;
 const EMPTY_TTL = 300_000;
+const RETRY_TTL = 10_000;
 
 // Setting names that let each portal section point at its own Hygraph model.
 const HYGRAPH_MODEL_ENV: Partial<Record<ContentKind, string>> = {
@@ -62,7 +63,12 @@ export async function resolvePortalItems(
     }
   }
 
-  cache.set(key, { at: Date.now(), ttl: result.source === "demo" ? EMPTY_TTL : OK_TTL, result });
+  if (hygraphEndpoint && result.source === "demo") {
+    // A temporary CMS failure must not erase publications already read successfully.
+    result = entry?.result.source === "hygraph" ? entry.result : { ...result, unavailable: true };
+  }
+  const ttl = hygraphEndpoint && result.source !== "hygraph" ? RETRY_TTL : result.source === "demo" ? EMPTY_TTL : OK_TTL;
+  cache.set(key, { at: Date.now(), ttl, result });
   return result;
 }
 
