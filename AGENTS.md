@@ -16,3 +16,4 @@
 - Read news and events through the shared server-side source module: try published Hygraph content when HYGRAPH_ENDPOINT is configured, then labelled demonstration content; read configuration only inside the server-function handler to keep runtime settings server-side.
 - Keep the same setting names available locally and hosted (a git-ignored `.env` file documented by `.env.example`, and project secrets in the hosted preview) so the portal can be developed in any editor without code changes.
 - CMS detail routes use shared TanStack Query options, explicit pending/error states and distinguish unavailable CMS fallback from confirmed missing content; temporary failures must not replace previously fetched publications with demonstration content.
+- Use the shared ContentPending indicator as the router default and for explicit page pending states so loading feedback stays consistent and respects reduced motion.

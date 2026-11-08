@@ -1,8 +1,9 @@
 import { useRouter, type ErrorComponentProps } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
+import { LoaderCircle } from "lucide-react";
 
 export function ContentPending() {
-  return <section className="section"><div className="wrap prose" role="status" aria-live="polite"><p>Chargement du contenu…</p></div></section>;
+  return <section className="section"><div className="wrap flex min-h-48 items-center justify-center gap-3 text-muted-foreground" role="status" aria-live="polite"><LoaderCircle className="size-6 shrink-0 animate-spin motion-reduce:animate-none" aria-hidden="true" /><p>Chargement du contenu…</p></div></section>;
 }
 
 export function ContentUnavailable() {
