@@ -94,12 +94,10 @@ export function ArchivePage({
   kind,
   items = content[kind],
   source = "demo",
-  unavailable = false,
 }: {
   kind: ContentKind;
   items?: ContentItem[];
   source?: ContentSource;
-  unavailable?: boolean;
 }) {
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("");
@@ -358,11 +356,13 @@ export function DetailPage({
   slug,
   items = content[kind],
   source = "demo",
+  unavailable = false,
 }: {
   kind: ContentKind;
   slug: string;
   items?: ContentItem[];
   source?: ContentSource;
+  unavailable?: boolean;
 }) {
   const item = items.find((i) => i.slug === slug);
   const [shared, setShared] = useState(false);
