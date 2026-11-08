@@ -1,6 +1,24 @@
-import { createFileRoute } from '@tanstack/react-router';
-import { DetailPage } from '@/components/portal/pages';
-import { metadata, content } from '@/lib/portal/content';
-import { getPortalItems } from '@/lib/portal/source';
-export const Route = createFileRoute('/galeries/$slug')({loader:()=>getPortalItems({data:{kind:'galeries'}}),head:({loaderData,params})=>{const item=(loaderData?.items??content.galeries).find(i=>i.slug===params.slug);return metadata(item?.title||'Page introuvable',item?.summary||'Ce contenu est indisponible.',item?.image);},component:Detail});
-function Detail() { const {slug}=Route.useParams();const {items,source}=Route.useLoaderData();return <DetailPage kind="galeries" slug={slug} items={items} source={source}/>; }
+import { createFileRoute } from "@tanstack/react-router";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { DetailPage, MissingPage } from "@/components/portal/pages";
+import { ContentPending, ContentError } from "@/components/portal/loading";
+import { metadata, pageInfo } from "@/lib/portal/content";
+import { portalQueryOptions } from "@/lib/portal/queries";
+
+export const Route = createFileRoute("/galeries/$slug")({
+  loader: ({ context }) => context.queryClient.ensureQueryData(portalQueryOptions("galeries")),
+  pendingMs: 0,
+  pendingComponent: ContentPending,
+  errorComponent: ContentError,
+  notFoundComponent: MissingPage,
+  head: ({ loaderData, params }) => {
+    const item = loaderData?.items.find((item) => item.slug === params.slug);
+    return metadata(item?.title ?? pageInfo.galeries.title, item?.summary ?? pageInfo.galeries.intro, item?.image);
+  },
+  component: Detail,
+});
+function Detail() {
+  const { slug } = Route.useParams();
+  const { data: { items, source, unavailable } } = useSuspenseQuery(portalQueryOptions("galeries"));
+  return <DetailPage kind="galeries" slug={slug} items={items} source={source} unavailable={unavailable} />;
+}
