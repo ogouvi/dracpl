@@ -32,6 +32,7 @@ import {
 } from "@/lib/portal/content";
 import { PageBanner, ContactBand, SocialLinks } from "./chrome";
 import type { ContentSource } from "@/lib/portal/source";
+import { ContentUnavailable } from "./loading";
 import {
   ContentCard,
   AnnouncementCard,
@@ -355,15 +356,17 @@ export function DetailPage({
   slug,
   items = content[kind],
   source = "demo",
+  unavailable = false,
 }: {
   kind: ContentKind;
   slug: string;
   items?: ContentItem[];
   source?: ContentSource;
+  unavailable?: boolean | undefined;
 }) {
   const item = items.find((i) => i.slug === slug);
   const [shared, setShared] = useState(false);
-  if (!item) return <MissingPage />;
+  if (!item) return unavailable ? <ContentUnavailable /> : <MissingPage />;
   const share = async () => {
     try {
       if (navigator.share) await navigator.share({ title: item.title, url: window.location.href });

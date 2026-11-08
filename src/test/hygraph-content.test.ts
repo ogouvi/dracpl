@@ -92,6 +92,32 @@ describe("Hygraph editorial content", () => {
     expect(mapHygraphRecord(news, "agenda", 0).location).toBeUndefined();
   });
 
+  it("marks a missing CMS response as unavailable, not a confirmed missing publication", async () => {
+    vi.stubGlobal("fetch", vi.fn(async () => { throw new Error("Rate limited"); }));
+    const result = await resolvePortalItems("annonces", { HYGRAPH_ENDPOINT: endpoint });
+    expect(result.unavailable).toBe(true);
+    expect((await resolvePortalItems("annonces", {})).unavailable).toBeUndefined();
+  });
+
+  it("keeps published content after a temporary CMS failure and retries the failed fallback", async () => {
+    let now = 0;
+    vi.spyOn(Date, "now").mockImplementation(() => now);
+    try {
+      vi.stubGlobal("fetch", vi.fn(async () => reply({ annonces: [news] })));
+      const published = await resolvePortalItems("annonces", { HYGRAPH_ENDPOINT: endpoint });
+      now = 60_001;
+      vi.stubGlobal("fetch", vi.fn(async () => { throw new Error("Rate limited"); }));
+      expect(await resolvePortalItems("annonces", { HYGRAPH_ENDPOINT: endpoint })).toEqual(published);
+      resetPortalCache();
+      await resolvePortalItems("annonces", { HYGRAPH_ENDPOINT: endpoint });
+      now += 10_001;
+      vi.stubGlobal("fetch", vi.fn(async () => reply({ annonces: [news] })));
+      expect((await resolvePortalItems("annonces", { HYGRAPH_ENDPOINT: endpoint })).source).toBe("hygraph");
+    } finally {
+      vi.restoreAllMocks();
+    }
+  });
+
   it("uses demonstration content when Hygraph is empty or unavailable", async () => {
     vi.stubGlobal(
       "fetch",
@@ -194,7 +220,7 @@ describe("Hygraph editorial content", () => {
   });
 
   it("does not query WordPress when only demonstration content is available", async () => {
-    const fetcher = vi.fn(async () => reply({ actualites: [] }));
+    const fetcher = vi.fn(async (_url: unknown) => reply({ actualites: [] }));
     vi.stubGlobal("fetch", fetcher);
 
     const result = await resolvePortalItems("actualites", {
