@@ -1,7 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { ArchivePage } from '@/components/portal/pages';
 import { metadata, pageInfo } from '@/lib/portal/content';
-import { getPortalItems } from '@/lib/portal/source';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { portalQueryOptions } from '@/lib/portal/queries';
 import { ContentPending, ContentError } from '@/components/portal/loading';
