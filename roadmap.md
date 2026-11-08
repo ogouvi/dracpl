@@ -6,4 +6,4 @@
 - [x] Finish and test the optional Hygraph reading layer for news and events, with demonstration content as fallback.
 - [x] Local VS Code workflow: `.env` support, `.env.example`, README steps.
 - [ ] Verify the connected Hygraph workspace and published content in the preview.
-- [ ] Prevent a temporary Hygraph failure or loading state from appearing as a missing announcement.
+- [x] Prevent a temporary Hygraph failure or loading state from appearing as a missing announcement.

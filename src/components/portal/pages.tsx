@@ -362,7 +362,7 @@ export function DetailPage({
   slug: string;
   items?: ContentItem[];
   source?: ContentSource;
-  unavailable?: boolean;
+  unavailable?: boolean | undefined;
 }) {
   const item = items.find((i) => i.slug === slug);
   const [shared, setShared] = useState(false);
