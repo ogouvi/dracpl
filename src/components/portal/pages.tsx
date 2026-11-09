@@ -32,7 +32,7 @@ import {
 } from "@/lib/portal/content";
 import { PageBanner, ContactBand, SocialLinks } from "./chrome";
 import type { ContentSource } from "@/lib/portal/source";
-import { ContentUnavailable } from "./loading";
+import { ContentUnavailable, ContentUnavailableNotice } from "./loading";
 import { usePortalCatalog } from "@/lib/portal/queries";
 import {
   ContentCard,
@@ -96,11 +96,14 @@ export function ArchivePage({
   kind,
   items = content[kind],
   source = "demo",
+  unavailable = false,
 }: {
   kind: ContentKind;
   items?: ContentItem[];
   source?: ContentSource;
+  unavailable?: boolean | undefined;
 }) {
+  if (unavailable) items = [];
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("");
   const [location, setLocation] = useState("");

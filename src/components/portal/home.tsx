@@ -11,6 +11,7 @@ import {
   ItemLink,
 } from "./cards";
 import { ContactBand } from "./chrome";
+import { ContentUnavailableNotice } from "./loading";
 import type { PortalResult } from "@/lib/portal/source";
 export function HomePage({
   news,
@@ -29,7 +30,6 @@ export function HomePage({
   const eventItems = events?.items ?? content.agenda;
   const announcementItems = annonces?.items ?? content.annonces;
   const featured = newsItems[0];
-  if (!featured) return null;
   return (
     <>
       <section className="hero">
@@ -88,11 +88,15 @@ export function HomePage({
               officielle.
             </p>
           )}
-          <div className="grid-3">
-            {announcementItems.slice(0, 3).map((item) => (
-              <AnnouncementCard item={item} key={item.slug} />
-            ))}
-          </div>
+          {annonces?.unavailable ? (
+            <ContentUnavailableNotice />
+          ) : (
+            <div className="grid-3">
+              {announcementItems.slice(0, 3).map((item) => (
+                <AnnouncementCard item={item} key={item.slug} />
+              ))}
+            </div>
+          )}
         </div>
       </section>
       <section className="section">
@@ -109,6 +113,9 @@ export function HomePage({
               officielle.
             </p>
           )}
+          {news?.unavailable || !featured ? (
+            <ContentUnavailableNotice />
+          ) : (
           <div className="news-grid">
             <div className="news-feature">
               <ContentCard kind="actualites" item={featured} />
@@ -141,6 +148,7 @@ export function HomePage({
               ))}
             </div>
           </div>
+          )}
         </div>
       </section>
       <section className="section section-soft">
@@ -156,11 +164,15 @@ export function HomePage({
               Rendez-vous de démonstration : informations et dates indicatives.
             </p>
           )}
-          <div className="grid-3">
-            {eventItems.slice(0, 3).map((item) => (
-              <ContentCard key={item.slug} kind="agenda" item={item} />
-            ))}
-          </div>
+          {events?.unavailable ? (
+            <ContentUnavailableNotice />
+          ) : (
+            <div className="grid-3">
+              {eventItems.slice(0, 3).map((item) => (
+                <ContentCard key={item.slug} kind="agenda" item={item} />
+              ))}
+            </div>
+          )}
         </div>
       </section>
       <section className="section">
