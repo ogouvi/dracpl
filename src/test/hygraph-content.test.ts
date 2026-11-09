@@ -148,10 +148,28 @@ describe("Hygraph editorial content", () => {
         return reply({ culturalNews: [news] });
       });
     vi.stubGlobal("fetch", fetcher);
-    expect(await loadFromHygraph(endpoint, "actualites", "culturalNews")).toBeNull();
+    await expect(loadFromHygraph(endpoint, "actualites", "culturalNews")).rejects.toThrow();
     expect((await loadFromHygraph(endpoint, "actualites", "culturalNews"))?.[0]?.title).toBe(
       "Rencontre culturelle",
     );
+  });
+
+  it("waits and retries when Hygraph refuses a request burst (429) instead of showing demonstration content", async () => {
+    const fetcher = vi
+      .fn()
+      .mockResolvedValueOnce(new Response("", { status: 429, headers: { "Retry-After": "0.01" } }))
+      .mockImplementation(async () => reply({ annonces: [news] }));
+    vi.stubGlobal("fetch", fetcher);
+    const result = await resolvePortalItems("annonces", { HYGRAPH_ENDPOINT: endpoint });
+    expect(result.source).toBe("hygraph");
+    expect(result.unavailable).toBeUndefined();
+  });
+
+  it("treats an empty Hygraph section as demonstration content, not as a temporary outage", async () => {
+    vi.stubGlobal("fetch", vi.fn(async () => reply({ galeries: [] })));
+    const result = await resolvePortalItems("galeries", { HYGRAPH_ENDPOINT: endpoint });
+    expect(result.source).toBe("demo");
+    expect(result.unavailable).toBeUndefined();
   });
 
   it("reads announcements, galleries and videos from their own Hygraph models", async () => {

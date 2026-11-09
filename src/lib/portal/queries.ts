@@ -5,7 +5,8 @@ import { getPortalItems, type PortalResult } from "./source";
 export const portalQueryOptions = (kind: ContentKind) => queryOptions({
   queryKey: ["portal-content", kind],
   queryFn: () => getPortalItems({ data: { kind } }),
-  staleTime: 60_000,
+  // A temporary CMS failure is refetched on the next visit instead of being kept for a minute.
+  staleTime: (query) => (query.state.data?.unavailable ? 0 : 60_000),
 });
 
 /** Rubriques whose publications may come from the CMS: every link to them must use CMS slugs. */
@@ -26,7 +27,8 @@ export function usePortalCatalog(): {
   CMS_KINDS.forEach((kind, index) => {
     const result = queries[index]?.data ?? { items: content[kind], source: "demo" as const };
     results[kind] = result;
-    items[kind] = result.items;
+    // While the CMS is unreachable, list no fallback items: their addresses would not match the published ones.
+    items[kind] = result.unavailable ? [] : result.items;
   });
   return { items, results };
 }
