@@ -166,7 +166,9 @@ export function ArchivePage({
           <p className="meta mb-5" aria-live="polite">
             {filtered.length} {filtered.length > 1 ? "résultats" : "résultat"}
           </p>
-          {filtered.length ? (
+          {unavailable ? (
+            <ContentUnavailableNotice />
+          ) : filtered.length ? (
             <div className="grid-3">
               {filtered
                 .slice((page - 1) * pageSize, page * pageSize)

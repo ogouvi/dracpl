@@ -8,6 +8,6 @@ export const Route = createFileRoute("/actualites/")({
   component: Actualites,
 });
 function Actualites() {
-  const { items, source } = Route.useLoaderData();
-  return <ArchivePage kind="actualites" items={items} source={source} />;
+  const { items, source, unavailable } = Route.useLoaderData();
+  return <ArchivePage kind="actualites" items={items} source={source} unavailable={unavailable} />;
 }
