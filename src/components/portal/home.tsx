@@ -82,7 +82,7 @@ export function HomePage({
             path="/annonces"
             label="Toutes les annonces"
           />
-          {annonces?.source === "demo" && (
+          {annonces?.source === "demo" && !annonces.unavailable && (
             <p className="meta mb-5">
               Annonces de démonstration : ces contenus ne constituent pas une publication
               officielle.
@@ -107,7 +107,7 @@ export function HomePage({
             path="/actualites"
             label="Toutes les actualités"
           />
-          {news?.source === "demo" && (
+          {news?.source === "demo" && !news.unavailable && (
             <p className="meta mb-5">
               Actualités de démonstration : ces contenus ne constituent pas une publication
               officielle.
@@ -159,7 +159,7 @@ export function HomePage({
             path="/agenda"
             label="Tout l’agenda culturel"
           />
-          {events?.source === "demo" && (
+          {events?.source === "demo" && !events.unavailable && (
             <p className="meta mb-5">
               Rendez-vous de démonstration : informations et dates indicatives.
             </p>
