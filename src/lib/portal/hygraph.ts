@@ -115,23 +115,45 @@ function modelsFor(kind: ContentKind, configured = ""): string[] {
     : defaults;
 }
 
+/** A request Hygraph could not answer (rate limit, network, outage): temporary, unlike a missing model or field. */
+export class HygraphRequestError extends Error {}
+
+const RATE_LIMIT_RETRIES = 3;
+const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
 async function fetchGraph(
   endpoint: string,
   query: string,
 ): Promise<{ data?: Record<string, unknown> | null; errors?: Array<{ message?: string }> }> {
-  const res = await fetch(endpoint, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", Accept: "application/json" },
-    body: JSON.stringify({ query }),
-    signal: AbortSignal.timeout(REQUEST_TIMEOUT),
-    cache: "no-store",
-  });
-  // Hygraph answers an unknown field with status 400 and a readable error list, which lets the next field variant be tried.
-  if (!res.ok && res.status !== 400) throw new Error(`Hygraph request failed [${res.status}]`);
-  return (await res.json()) as {
-    data?: Record<string, unknown> | null;
-    errors?: Array<{ message?: string }>;
-  };
+  for (let attempt = 0; ; attempt++) {
+    let res: Response;
+    try {
+      res = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify({ query }),
+        signal: AbortSignal.timeout(REQUEST_TIMEOUT),
+        cache: "no-store",
+      });
+    } catch (error) {
+      throw new HygraphRequestError(error instanceof Error ? error.message : String(error));
+    }
+    // Hygraph refuses request bursts with 429: wait briefly and try again instead of falling back.
+    if (res.status === 429 && attempt < RATE_LIMIT_RETRIES) {
+      const retryAfter = Number(res.headers.get("Retry-After"));
+      const delay = Number.isFinite(retryAfter) && retryAfter > 0
+        ? Math.min(retryAfter * 1000, 2000)
+        : 300 * 2 ** attempt + Math.floor(Math.random() * 250);
+      await wait(delay);
+      continue;
+    }
+    // Hygraph answers an unknown field with status 400 and a readable error list, which lets the next field variant be tried.
+    if (!res.ok && res.status !== 400) throw new HygraphRequestError(`Hygraph request failed [${res.status}]`);
+    return (await res.json()) as {
+      data?: Record<string, unknown> | null;
+      errors?: Array<{ message?: string }>;
+    };
+  }
 }
 
 function graphError(errors: Array<{ message?: string }> | undefined): string | null {
@@ -163,22 +185,19 @@ async function resolveModel(
   const key = `${endpoint}:${kind}:${configured ?? ""}`;
   const cached = modelCache.get(key);
   if (cached) return cached;
+  // Request failures propagate so a temporary outage is never mistaken for a missing workspace.
   for (const model of modelsFor(kind, configured)) {
-    try {
-      let { data, errors } = await fetchGraph(endpoint, queryFor(model, MINIMAL_FIELDS));
-      if (!recordsFrom(data, model))
-        ({ data, errors } = await fetchGraph(endpoint, queryFor(model, FR_MINIMAL)));
-      if (recordsFrom(data, model)) {
-        modelCache.set(key, model);
-        return model;
-      }
-      // The name exists but holds nothing yet: that is still the right workspace.
-      if (!graphError(errors)) {
-        modelCache.set(key, model);
-        return model;
-      }
-    } catch {
-      return null;
+    let { data, errors } = await fetchGraph(endpoint, queryFor(model, MINIMAL_FIELDS));
+    if (!recordsFrom(data, model))
+      ({ data, errors } = await fetchGraph(endpoint, queryFor(model, FR_MINIMAL)));
+    if (recordsFrom(data, model)) {
+      modelCache.set(key, model);
+      return model;
+    }
+    // The name exists but holds nothing yet: that is still the right workspace.
+    if (!graphError(errors)) {
+      modelCache.set(key, model);
+      return model;
     }
   }
   return null;
@@ -306,7 +325,7 @@ export function mapHygraphRecord(
   return item;
 }
 
-// Returns null whenever Hygraph holds nothing usable, so the portal can fall back quietly.
+// Returns null when Hygraph holds nothing usable; throws HygraphRequestError when Hygraph could not be reached.
 export async function loadFromHygraph(
   endpoint: string,
   kind: ContentKind,
@@ -319,6 +338,7 @@ export async function loadFromHygraph(
     if (!records.length) return null;
     return records.map((record, index) => mapHygraphRecord(record, kind, index));
   } catch (error) {
+    if (error instanceof HygraphRequestError) throw error;
     console.warn(
       `Hygraph indisponible pour « ${kind} » : ${error instanceof Error ? error.message : String(error)}`,
     );

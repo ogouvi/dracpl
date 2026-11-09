@@ -42,6 +42,7 @@ export async function resolvePortalItems(
 
   const hygraphEndpoint = (env["HYGRAPH_ENDPOINT"] || "").trim();
   let result: PortalResult = { items: content[kind], source: "demo" };
+  let failed = false;
 
   if (hygraphEndpoint) {
     try {
@@ -57,17 +58,19 @@ export async function resolvePortalItems(
           `Hygraph n’a rien fourni pour « ${kind} » : repli sur le contenu de démonstration.`,
         );
     } catch (error) {
+      failed = true;
       console.warn(
         `Hygraph indisponible pour « ${kind} » : ${error instanceof Error ? error.message : String(error)}`,
       );
     }
   }
 
-  if (hygraphEndpoint && result.source === "demo") {
+  // Only a failed request is "unavailable": an empty Hygraph section uses the labelled demonstration content everywhere.
+  if (failed) {
     // A temporary CMS failure must not erase publications already read successfully.
     result = entry?.result.source === "hygraph" ? entry.result : { ...result, unavailable: true };
   }
-  const ttl = hygraphEndpoint && result.source !== "hygraph" ? RETRY_TTL : result.source === "demo" ? EMPTY_TTL : OK_TTL;
+  const ttl = failed ? RETRY_TTL : hygraphEndpoint || result.source === "hygraph" ? OK_TTL : EMPTY_TTL;
   cache.set(key, { at: Date.now(), ttl, result });
   return result;
 }

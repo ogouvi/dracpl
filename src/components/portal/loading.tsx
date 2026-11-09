@@ -15,3 +15,8 @@ export function ContentError({ reset }: ErrorComponentProps) {
   const router = useRouter();
   return <section className="section"><div className="wrap prose" role="alert"><h1>Le contenu n’a pas pu être chargé</h1><Button variant="outline" onClick={async () => { await router.invalidate(); reset(); }}>Réessayer</Button></div></section>;
 }
+/** Replaces a list while the CMS is unreachable, so no card links to an address that does not exist. */
+export function ContentUnavailableNotice() {
+  const router = useRouter();
+  return <div className="flex flex-wrap items-center gap-4 text-muted-foreground" role="status"><p>Ces publications sont temporairement indisponibles. Veuillez réessayer dans quelques instants.</p><Button variant="outline" size="sm" onClick={() => { void router.invalidate(); }}>Réessayer</Button></div>;
+}
