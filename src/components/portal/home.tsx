@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowRight, ArrowUpRight, MapPin, CalendarDays } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { content, images } from "@/lib/portal/content";
+import { content, images, type ContentItem } from "@/lib/portal/content";
 import {
   AnnouncementCard,
   ContentCard,
@@ -12,9 +12,22 @@ import {
 } from "./cards";
 import { ContactBand } from "./chrome";
 import type { PortalResult } from "@/lib/portal/source";
-export function HomePage({ news, events }: { news?: PortalResult; events?: PortalResult }) {
+export function HomePage({
+  news,
+  events,
+  annonces,
+  galeries = content.galeries,
+  videos = content.videos,
+}: {
+  news?: PortalResult;
+  events?: PortalResult;
+  annonces?: PortalResult;
+  galeries?: ContentItem[];
+  videos?: ContentItem[];
+}) {
   const newsItems = news?.items ?? content.actualites;
   const eventItems = events?.items ?? content.agenda;
+  const announcementItems = annonces?.items ?? content.annonces;
   const featured = newsItems[0];
   if (!featured) return null;
   return (
@@ -69,8 +82,14 @@ export function HomePage({ news, events }: { news?: PortalResult; events?: Porta
             path="/annonces"
             label="Toutes les annonces"
           />
+          {annonces?.source === "demo" && (
+            <p className="meta mb-5">
+              Annonces de démonstration : ces contenus ne constituent pas une publication
+              officielle.
+            </p>
+          )}
           <div className="grid-3">
-            {content.annonces.map((item) => (
+            {announcementItems.slice(0, 3).map((item) => (
               <AnnouncementCard item={item} key={item.slug} />
             ))}
           </div>
@@ -164,13 +183,13 @@ export function HomePage({ news, events }: { news?: PortalResult; events?: Porta
             label="Toute la médiathèque"
           />
           <div className="grid-3">
-            {content.galeries.slice(0, 1).map((item) => (
+            {galeries.slice(0, 1).map((item) => (
               <ContentCard key={item.slug} kind="galeries" item={item} />
             ))}
-            {content.videos.slice(0, 1).map((item) => (
+            {videos.slice(0, 1).map((item) => (
               <ContentCard key={item.slug} kind="videos" item={item} />
             ))}
-            {content.galeries.slice(2, 3).map((item) => (
+            {galeries.slice(galeries.length > 2 ? 2 : 1, galeries.length > 2 ? 3 : 2).map((item) => (
               <ContentCard key={item.slug} kind="galeries" item={item} />
             ))}
           </div>

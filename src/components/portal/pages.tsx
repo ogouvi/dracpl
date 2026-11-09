@@ -33,6 +33,7 @@ import {
 import { PageBanner, ContactBand, SocialLinks } from "./chrome";
 import type { ContentSource } from "@/lib/portal/source";
 import { ContentUnavailable } from "./loading";
+import { usePortalCatalog } from "@/lib/portal/queries";
 import {
   ContentCard,
   AnnouncementCard,
@@ -42,7 +43,8 @@ import {
   ItemLink,
 } from "./cards";
 const kinds = Object.keys(content) as ContentKind[];
-const searchable = kinds.flatMap((kind) => content[kind].map((item) => ({ item, kind })));
+const toSearchable = (catalog: Record<ContentKind, ContentItem[]>) =>
+  kinds.flatMap((kind) => catalog[kind].map((item) => ({ item, kind })));
 const normalize = (s: string) =>
   s
     .normalize("NFD")
@@ -633,6 +635,7 @@ const faqGroups = [
   },
 ];
 export function SearchPage({ q = "" }: { q?: string }) {
+  const searchable = toSearchable(usePortalCatalog().items);
   const [input, setInput] = useState(q);
   const [page, setPage] = useState(1);
   const navigate = useNavigate();
@@ -1290,17 +1293,7 @@ export function StaticPage({
                       {pageInfo[s].title}
                       <ArrowRight size={14} />
                     </Link>
-                    {s in content && (
-                      <ul className="mt-3">
-                        {content[s as ContentKind].map((item) => (
-                          <li className="text-xs text-muted-foreground my-2" key={item.slug}>
-                            <ItemLink kind={s as ContentKind} item={item}>
-                              {item.title}
-                            </ItemLink>
-                          </li>
-                        ))}
-                      </ul>
-                    )}
+                    {s in content && <SiteMapItems kind={s as ContentKind} />}
                   </div>
                 ))}
             </div>
@@ -1313,7 +1306,22 @@ export function StaticPage({
     </>
   );
 }
+function SiteMapItems({ kind }: { kind: ContentKind }) {
+  const { items } = usePortalCatalog();
+  return (
+    <ul className="mt-3">
+      {items[kind].map((item) => (
+        <li className="text-xs text-muted-foreground my-2" key={item.slug}>
+          <ItemLink kind={kind} item={item}>
+            {item.title}
+          </ItemLink>
+        </li>
+      ))}
+    </ul>
+  );
+}
 function ArchiveExplorer() {
+  const searchable = toSearchable(usePortalCatalog().items);
   const [year, setYear] = useState("2026");
   const [theme, setTheme] = useState("");
   const [kind, setKind] = useState("");
